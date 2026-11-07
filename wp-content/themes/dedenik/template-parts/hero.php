@@ -13,6 +13,6 @@ if ( ! $image ) { $image = wp_get_attachment_image_url( absint( get_theme_mod( '
         <?php if ( ! post_password_required() ) : ?><div class="hero-excerpt"><?php the_excerpt(); ?></div><?php endif; ?>
         <?php dedenik_metadata(); ?>
         <a class="button button-light" href="<?php the_permalink(); ?>"><?php esc_html_e( 'Přečíst článek →', 'dedenik' ); ?></a>
-    </div><?php get_template_part( 'template-parts/chatnik' ); ?></div>
+    </div></div>
 </section>
 <?php endwhile; wp_reset_postdata(); ?>
