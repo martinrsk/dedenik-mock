@@ -1,0 +1,61 @@
+name: Check and deploy design system
+
+on:
+  pull_request:
+    branches: [main]
+    paths: ['design-system/**', 'wp-content/themes/dedenik/assets/css/main.css', 'scripts/*design-system*', 'scripts/tests/test_design_system_deploy.py', '.github/workflows/design-system.yml']
+  push:
+    branches: [main]
+    paths: ['design-system/**', 'wp-content/themes/dedenik/assets/css/main.css', 'scripts/*design-system*', 'scripts/tests/test_design_system_deploy.py', '.github/workflows/design-system.yml']
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Only verify FTPS and the target, without uploading files'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: svetdede-design-system
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Check generated design-system files
+        run: python3 scripts/build-design-system.py --check
+      - name: Check design-system deployment boundaries
+        run: python3 -m unittest discover -s scripts/tests -p '*design_system*.py'
+
+  deploy:
+    needs: check
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && vars.SVETDEDE_AUTO_DEPLOY == 'true'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment:
+      name: svetdede
+      url: https://svetdede.dedenik.cz/design-system/
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Deploy design system over verified FTPS
+        env:
+          SVETDEDE_FTP_HOST: ${{ secrets.SVETDEDE_FTP_HOST }}
+          SVETDEDE_FTP_USER: ${{ secrets.SVETDEDE_FTP_USER }}
+          SVETDEDE_FTP_PASSWORD: ${{ secrets.SVETDEDE_FTP_PASSWORD }}
+          SVETDEDE_FTP_PORT: ${{ vars.SVETDEDE_FTP_PORT || '21' }}
+          DEPLOY_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'true' || 'false' }}
+        run: |
+          if [ "$DEPLOY_DRY_RUN" = true ]; then
+            python3 scripts/deploy-design-system.py --dry-run
+          else
+            python3 scripts/deploy-design-system.py --apply
+          fi

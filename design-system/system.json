@@ -1,0 +1,104 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-11-01",
+  "name": "Dedeník / Svět Dede",
+  "locale": "cs-CZ",
+  "site": "https://svetdede.dedenik.cz/",
+  "description": "Sdílený základ pro návrh, implementaci a redakční práci. Schválená pravidla doplňují konkrétní ukázky a strojově čitelné tokeny.",
+  "implementation": {
+    "source": "wp-content/themes/dedenik",
+    "deploymentScope": "design-system-only",
+    "productionParity": "not-asserted",
+    "description": "Dokumentace vychází ze současného lokálního zdroje šablony. Nasazení složky design-system samo nenasazuje změny WordPress šablony ani nemění obsah článků."
+  },
+  "principles": [
+    { "id": "reading-first", "title": "Nejdřív čtení", "description": "Dedeník je redakční a komunitní web. Hierarchie vede od rubriky přes titulek a perex k autorovi, datu a diskusi. Dlouhé texty mají klidné pozadí a čitelný řádek." },
+    { "id": "warm-editorial", "title": "Teplý redakční charakter", "description": "Tmavá modř a zelená doplňují papírové pozadí. Patkové nadpisy a články odlišujeme od bezpatkového ovládání." },
+    { "id": "consistent-ratios", "title": "Stálé proporce", "description": "Poměr grafické plochy se při změně šířky nemění. Vodorovná grafika má 2,65 : 1, svislá 1 : 2,65 a fotografie v článku 3 : 2. Poměr se vztahuje k obrazové ploše, nikoli k celé kartě s textem." },
+    { "id": "preserve-artwork", "title": "Chránit obsah grafiky", "description": "Loga, obálky a grafiky s textem zobrazujeme celé. Pro dekorativní podklady je ořez možný; důležitý motiv musí zůstat rozpoznatelný. Žádný obrázek nedeformujeme." },
+    { "id": "explicit-change", "title": "Změna má jedno vysvětlení", "description": "Hodnotu upravíme v tokens.json, pravidlo v system.json, změnu zapíšeme do CHANGELOG.md a znovu sestavíme dokumentaci. Samostatně promítneme schválenou změnu do šablony a ověříme její zobrazení." }
+  ],
+  "typography": [
+    { "id": "page-title", "title": "Hlavní nadpis", "family": "--serif", "size": "clamp(32px, 4vw, 50px)", "lineHeight": "1.14", "weight": "400", "selector": "h1", "description": "Obecný nadpis stránky; kompaktní homepage má vlastní velikost 32 px." },
+    { "id": "section-title", "title": "Nadpis sekce", "family": "--serif", "size": "32px", "lineHeight": "1.14", "weight": "400", "selector": "h2", "description": "Zřetelně odděluje obsahové bloky bez další dekorace." },
+    { "id": "article-card-title", "title": "Titulek karty", "family": "--serif", "size": "22px", "lineHeight": "1.15", "weight": "400", "selector": ".home #latest .card-title", "description": "Kompaktní karty homepage. Obecná karta používá 25 px / 1,12." },
+    { "id": "article-body", "title": "Text článku", "family": "--serif", "size": "19px", "lineHeight": "1.75", "weight": "400", "selector": ".entry-content", "description": "Na šířkách do 650 px je velikost 18 px; maximální šířka čtecího sloupce je 850 px." },
+    { "id": "interface", "title": "Rozhraní", "family": "--sans", "size": "16px", "lineHeight": "1.55", "weight": "400", "selector": "body", "description": "Ovládací prvky a běžný text rozhraní. Tlačítka používají tučnost 700." },
+    { "id": "metadata", "title": "Metadata", "family": "--sans", "size": "12px", "lineHeight": "inherit", "weight": "400", "selector": ".post-meta", "description": "Autor, datum a počet komentářů. Jde o existující kompaktní velikost; u nových hustých rozhraní ověřit čitelnost a zvětšení textu." }
+  ],
+  "imageFormats": [
+    { "id": "graphic-landscape", "title": "Grafika na šířku", "ratio": "2.65 / 1", "label": "2,65 : 1", "token": "--ratio-graphic", "canvas": { "width": 1590, "height": 600 }, "fit": "contain", "blockStyle": "is-style-dedenik-graphic", "uses": ["logo v menu a patičce", "náhledová plocha článku", "dlaždice rubriky", "grafika vložená do článku"], "description": "U loga a grafiky s textem zachovat celé dílo pomocí contain. Dekorativní podklady náhledů a rubrik mohou používat cover." },
+    { "id": "graphic-portrait", "title": "Grafika na výšku", "ratio": "1 / 2.65", "label": "1 : 2,65", "token": "--ratio-graphic-portrait", "canvas": { "width": 600, "height": 1590 }, "fit": "contain", "blockStyle": "is-style-dedenik-graphic-portrait", "uses": ["grafika Světa Dede", "obálka v samostatné ploše", "svislá grafika vložená do článku"], "description": "V kartě Světa Dede má obrazová plocha běžně 80 × 212 px. Kniha zachovává celou obálku; podcast a divadlo používají dekorativní ořez." },
+    { "id": "article-photo", "title": "Fotografie v článku", "ratio": "3 / 2", "label": "3 : 2", "token": "--ratio-photo", "canvas": { "width": 1500, "height": 1000 }, "fit": "cover", "blockStyle": "is-style-dedenik-photo", "uses": ["úvodní fotografie článku", "výslovně označená fotografie v obsahu"], "description": "Fotografii připravit nebo oříznout na 3 : 2 s ohledem na motiv. Starší nerozlišené obrázky v textu se automaticky nepřevádějí." }
+  ],
+  "components": [
+    { "id": "brand", "title": "Logo a hlavička", "selector": ".brand .logo, .brand .custom-logo", "source": "wp-content/themes/dedenik/header.php", "description": "Logo je vstupem na homepage, má vlastní volný prostor a poměr 2,65 : 1.", "tokens": ["--navy", "--ratio-graphic"], "states": ["default", "focus-visible"], "rules": ["Vždy contain; nikdy neroztahovat ani neořezávat znak nebo nápis.", "Alternativní text obsahuje název webu.", "Mobilní šířka se zmenšuje, poměr zůstává stejný."] },
+    { "id": "button", "title": "Tlačítko", "selector": ".button", "source": "wp-content/themes/dedenik/assets/css/main.css", "description": "Primární akce používá bílý text na tmavé zelené a stručný slovesný popisek.", "tokens": ["--green", "--sans", "--radius-control"], "states": ["default", "hover", "focus-visible", "disabled where supported"], "rules": ["Navigace používá a, akce používá button.", "Vedlejší akce nesmí vizuálně soupeřit s primární.", "Disabled má skutečný atribut disabled; snížená neprůhlednost sama nestačí.", "Zlatá a červená varianta současného webu vyžadují samostatnou kontrolu kontrastu."] },
+    { "id": "category-tab", "title": "Přepínač rubriky", "selector": ".category-tabs a", "source": "wp-content/themes/dedenik/front-page.php", "description": "Oblé odkazy nad nejnovějšími články. Aktivní rubrika je zelená s bílým textem.", "tokens": ["--green", "--line", "--radius-pill"], "states": ["default", "hover", "focus-visible", "active"], "rules": ["Aktivní položka má aria-current.", "Skupina se zalamuje a nevytváří horizontální přetékání.", "Popisek zůstává skutečným názvem rubriky."] },
+    { "id": "article-card", "title": "Karta článku", "selector": ".card", "source": "wp-content/themes/dedenik/template-parts/card.php", "description": "Náhled 2,65 : 1, rubrika, titulek, perex a metadata tvoří jednu přehlednou jednotku.", "tokens": ["--ratio-graphic", "--line", "--serif", "--radius-card"], "states": ["default", "linked-title-hover", "focus-visible", "missing-image"], "rules": ["Poměr patří obrázku, ne celé kartě.", "Na homepage může být perex zkrácen na tři řádky, titulek musí zůstat celý.", "Bez obrázku se zobrazí neutrální náhradní plocha.", "Náhledová fotografie je grafická plocha 2,65 : 1; v detailu článku má fotografie 3 : 2."] },
+    { "id": "world-card", "title": "Karta Světa Dede", "selector": ".world-card", "source": "wp-content/themes/dedenik/template-parts/world.php", "description": "Svislá grafika doplněná štítkem, titulkem a jednou hlavní akcí.", "tokens": ["--ratio-graphic-portrait", "--cream", "--radius-card", "--radius-image"], "states": ["podcast", "theatre", "books", "focus-visible"], "rules": ["Obrazová plocha je 80 × 212 px; do 360 px má 64 × 169,6 px.", "Obálky se zobrazují celé pomocí contain na krémovém podkladu.", "Nové podklady připravovat přímo v cílovém poměru; původní čtvercová obálka bude mít volné okraje.", "Odkaz směřuje na skutečný projekt, nikoli na slepou demonstrační akci."] },
+    { "id": "topic-tile", "title": "Dlaždice rubriky", "selector": ".topic", "source": "wp-content/themes/dedenik/template-parts/discover.php", "description": "Vodorovná obrazová dlaždice 2,65 : 1 s názvem nad tmavým přechodem.", "tokens": ["--ratio-graphic", "--green", "--radius-image"], "states": ["default", "hover", "focus-visible"], "rules": ["Název je HTML text, nikoli text zapečený do obrázku.", "Mřížka používá auto-fit s minimem 150 px a přizpůsobuje počet sloupců.", "Dlouhý název se může zalomit, nesmí být uříznutý.", "Dekorativní obrázek má prázdný alt, protože odkaz už pojmenovává text."] },
+    { "id": "article-image", "title": "Obrázek článku", "selector": ".article-image, .wp-block-image", "source": "wp-content/themes/dedenik/single.php", "description": "Výchozí úvodní plocha je fotografie 3 : 2. V obsahu se typ volí explicitně ve stylech bloku Obrázek.", "tokens": ["--ratio-photo", "--ratio-graphic", "--ratio-graphic-portrait", "--radius-article"], "states": ["photo", "graphic-landscape", "graphic-portrait", "legacy-natural"], "rules": ["Volba grafického stylu chrání celý obrázek včetně textu i proti staršímu uloženému ořezu.", "Styl nikdy neurčovat automaticky podle názvu souboru nebo poměru zdrojového obrázku.", "Původní HTML obrázky bez klasifikace zachovávají své proporce.", "Úvodní obrázek není automaticky klasifikován jako grafika; zvláštní úvodní grafiky je nutné řešit vědomě."] },
+    { "id": "form", "title": "Formulář a vyhledávání", "selector": ".search-form, .comment-form", "source": "wp-content/themes/dedenik/searchform.php", "description": "Viditelná nebo přístupná jmenovka, srozumitelná akce a čitelný výsledek.", "tokens": ["--ink", "--green", "--line", "--sans"], "states": ["empty", "filled", "focus-visible", "error", "submitting where supported"], "rules": ["Placeholder nenahrazuje label.", "Chyba má textové vysvětlení a vazbu na příslušné pole.", "Rozpracovaný stav se hlásí textem; ne pouze změnou barvy.", "Demonstrační formuláře design systému nic neposílají do WordPressu."] },
+    { "id": "avatar", "title": "Avatar autora", "selector": ".author-initial, .avatar", "source": "wp-content/themes/dedenik/template-parts/authors.php", "description": "Kruh s fotografií nebo iniciálou a jménem autora.", "tokens": ["--navy", "--radius-circle"], "states": ["photo", "initial-fallback", "focus-visible"], "rules": ["Avatary a funkční ikony mají vlastní kompaktní tvar; pravidlo 2,65 : 1 se na ně nevztahuje.", "Jméno musí být dostupné jako text."] }
+  ],
+  "responsive": [
+    { "id": "container", "title": "Šířka obsahu", "query": "all", "description": "Obecný obsah má maximum 1220 px a boční odsazení 24 px. Homepage má maximum 1180 px a odsazení 20 px. Čtecí sloupec má maximum 850 px." },
+    { "id": "large", "title": "Velký desktop", "query": "(min-width: 1151px)", "description": "Čtyři karty článků vedle sebe; plná navigace podle dostupného prostoru." },
+    { "id": "cards-three", "title": "Kompaktní desktop", "query": "(max-width: 1150px)", "description": "Karty článků přecházejí na tři sloupce a vyhledávání v hlavičce se skryje." },
+    { "id": "navigation", "title": "Menu a dva sloupce článků", "query": "(max-width: 1050px)", "description": "Navigace se mění na rozbalovací menu, karty článků mají dva sloupce a čtecí rozvržení se skládá pod sebe." },
+    { "id": "home-stacked", "title": "Homepage pod sebou", "query": "(max-width: 950px)", "description": "Svět Dede, blok rubrik s autory a vyhledávání s archivem přecházejí na jeden hlavní sloupec." },
+    { "id": "mobile", "title": "Mobilní čtení", "query": "(max-width: 650px)", "description": "Karty článků mají jeden sloupec, článek používá 18px text. Obecný wrapper má odsazení 18 px; homepage dál používá vlastní 20 px." },
+    { "id": "small-mobile", "title": "Nejužší mobil", "query": "(max-width: 360px)", "description": "Sloupec svislé grafiky Světa Dede se zmenší na 64 px. Dlaždice rubrik automaticky zvolí tolik sloupců, kolik se bezpečně vejde." },
+    { "id": "topic-grid", "title": "Plynulá mřížka rubrik", "query": "repeat(auto-fit, minmax(min(100%, 150px), 1fr))", "description": "Počet sloupců řídí dostupný prostor, ne samostatné pevné breakpointy. Na šířce 320 px může být jedna dlaždice v řádku." },
+    { "id": "validation", "title": "Minimální sada kontroly", "query": "320px, 390px, 738px, 960px, 1440px", "description": "Ověřit přetékání, celé názvy, stálé poměry, funkční menu a ovládání klávesnicí. Jde o kontrolní šířky, nikoli pět návrhových breakpointů." }
+  ],
+  "accessibility": {
+    "rules": [
+      { "id": "keyboard", "title": "Klávesnice", "description": "Všechny akce jsou dostupné přes klávesnici; focus zůstává viditelný. Současný focus používá 3px zlatý obrys s odsazením 4 px. Na nových podkladech ověřit jeho kontrast." },
+      { "id": "text-contrast", "title": "Kontrast textu", "description": "Pro nový běžný text mířit alespoň na kontrast 4,5 : 1. Barvy značky nejsou automaticky vhodné jako pozadí drobného bílého textu." },
+      { "id": "target-size", "title": "Ovládací plocha", "description": "Nové hlavní dotykové akce navrhovat s pohodlnou plochou přibližně 44 × 44 px. Historické malé odkazy je nutné posuzovat samostatně; nejde o potvrzení celowebového auditu." },
+      { "id": "semantics", "title": "Význam v HTML", "description": "Zachovat pořadí nadpisů, seznamy, labely a skutečné odkazy. Aktivní stav nesdělovat jen barvou. Obrázky s informační hodnotou potřebují věcný alt." },
+      { "id": "zoom", "title": "Zvětšení a pohyb", "description": "Při zvětšení textu musí zůstat čitelné titulky a ovládání. Respektovat prefers-reduced-motion a nevyžadovat animaci k pochopení obsahu." }
+    ],
+    "contrastMethod": "Vypočtený poměr relativního jasu sRGB pro plné uvedené barvy. Neověřuje průhlednosti, obrázky, všechny stavy ani celé WCAG.",
+    "contrast": [
+      { "id": "ink-paper", "foreground": "#18202c", "background": "#fffdf8", "ratio": 16.12, "normalText": "pass", "description": "Hlavní text na papírovém pozadí." },
+      { "id": "muted-paper", "foreground": "#69707b", "background": "#fffdf8", "ratio": 4.91, "normalText": "pass", "description": "Doplňkový text na papírovém pozadí." },
+      { "id": "white-green", "foreground": "#ffffff", "background": "#173d32", "ratio": 12.0, "normalText": "pass", "description": "Primární tlačítko." },
+      { "id": "white-navy", "foreground": "#ffffff", "background": "#05092b", "ratio": 19.44, "normalText": "pass", "description": "Bílý text v tmavé hlavičce." },
+      { "id": "white-red", "foreground": "#ffffff", "background": "#ef1820", "ratio": 4.36, "normalText": "review", "description": "Pod hranicí 4,5 : 1 pro běžný text; současná červená varianta vyžaduje úpravu nebo posouzení konkrétní velikosti." },
+      { "id": "white-gold", "foreground": "#ffffff", "background": "#b8872d", "ratio": 3.21, "normalText": "review", "description": "Nevhodné pro nový drobný bílý text. Zlatá zůstává akcentem; konkrétní tlačítko je známá odchylka." },
+      { "id": "ink-gold", "foreground": "#18202c", "background": "#b8872d", "ratio": 5.1, "normalText": "pass", "description": "Možná čitelná varianta textu na zlatém podkladu; dosud nejde o plošně nasazenou změnu značky." }
+    ]
+  },
+  "workflow": {
+    "command": "python scripts/build-design-system.py",
+    "sources": [
+      { "path": "design-system/tokens.json", "purpose": "Hodnoty a pojmenování tokenů." },
+      { "path": "design-system/system.json", "purpose": "Principy, použití, komponenty, přístupnost a omezení." },
+      { "path": "design-system/README.md", "purpose": "Vstupní bod pro agenty a návrháře." },
+      { "path": "design-system/CHANGELOG.md", "purpose": "Historie schválených změn." },
+      { "path": "wp-content/themes/dedenik/assets/css/main.css", "purpose": "Skutečná implementace veřejné šablony; změna JSON ji sama nepřepisuje." },
+      { "path": "wp-content/themes/dedenik/assets/css/editor.css", "purpose": "Vzhled a explicitní styly obrázků v editoru WordPressu." },
+      { "path": "wp-content/themes/dedenik/inc/setup.php", "purpose": "Registrace stylů bloků a nastavení šablony." }
+    ],
+    "steps": [
+      "Přečíst README.md, tokens.json a relevantní pravidla v system.json. Rozlišit schválený návrh, lokální implementaci a nasazený web.",
+      "Upravit zdrojový JSON a jeho version/updated. Stabilní id a názvy CSS proměnných zachovat, pokud není změna záměrně nekompatibilní.",
+      "Zapsat důvod a dopad do CHANGELOG.md. Vygenerované index.html a tokens.css neupravovat ručně.",
+      "Z kořene repozitáře spustit python scripts/build-design-system.py. Ověřit odkazy, JSON a vizuální ukázky.",
+      "Pokud se mění web, promítnout změnu samostatně do main.css, editor.css a odpovídající komponenty. Ověřit uvedené kontrolní šířky.",
+      "Nasadit výslovně požadovaný rozsah. Publikace dokumentace není publikací ostatních rozpracovaných změn šablony."
+    ]
+  },
+  "limitations": [
+    { "id": "production-parity", "title": "Dokumentace není automatická migrace", "description": "Tato verze popisuje schválená pravidla a současný lokální zdroj. Samostatné nasazení design systému nepotvrzuje, že všechny tyto úpravy už běží v produkční šabloně." },
+    { "id": "legacy-images", "title": "Starší obsah nemá klasifikaci", "description": "Historické inline obrázky mohou být fotografie, mapy, loga nebo textové grafiky. Bez explicitního stylu zachovávají původní rozměry a poměr." },
+    { "id": "thumbnail-resolution", "title": "Rozlišení náhledů", "description": "Některé historické náhledy mají jen kolem 100 px na výšku. CSS poměr jejich ostrost nezvýší; náhrada zdroje nebo nové odvozené velikosti je samostatná úloha." },
+    { "id": "cover-space", "title": "Volné okraje u obálek", "description": "Čtvercová nebo běžná knižní obálka uvnitř úzké plochy 1 : 2,65 nechává volný prostor. To chrání titul a kresbu; nová grafika může využít celé cílové plátno." },
+    { "id": "contrast-debt", "title": "Červená a zlatá tlačítka", "description": "Bílý text na aktuální červené a zlaté nedosahuje 4,5 : 1. Je to evidovaná odchylka současné šablony, nikoli doporučený vzor pro nový běžný text." },
+    { "id": "legacy-css", "title": "Postupná tokenizace", "description": "Barvy, rodiny písem a poměry používají CSS proměnné. Řada starších rozměrů a okrajových barev je zapsaná přímo v CSS. Referenční stupnice mezer a poloměrů není tvrzením o jejich úplné migraci." },
+    { "id": "scope", "title": "Výjimky podle účelu", "description": "Poměr 2,65 : 1 se nevztahuje na celé karty, avatary, funkční ikony, přehrávače ani panoramatické pozadí patičky. Grafický formát se vybírá podle role prvku." }
+  ]
+}

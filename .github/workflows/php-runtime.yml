@@ -1,0 +1,25 @@
+name: Check staging PHP runtime
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: svetdede-runtime-check
+  cancel-in-progress: false
+jobs:
+  check:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment: svetdede
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Read PHP version and remove temporary authenticated probe
+        env:
+          SVETDEDE_FTP_HOST: ${{ secrets.SVETDEDE_FTP_HOST }}
+          SVETDEDE_FTP_USER: ${{ secrets.SVETDEDE_FTP_USER }}
+          SVETDEDE_FTP_PASSWORD: ${{ secrets.SVETDEDE_FTP_PASSWORD }}
+          SVETDEDE_FTP_PORT: ${{ vars.SVETDEDE_FTP_PORT || '21' }}
+        run: python3 scripts/check-php-runtime.py

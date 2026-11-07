@@ -38,3 +38,10 @@ php.ini
 *.bak
 *.log
 *.wpress
+
+# Local development, archives and staging build output
+/old_web/
+/dist/
+__pycache__/
+*.pyc
+/.deploy/

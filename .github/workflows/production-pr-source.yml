@@ -1,0 +1,31 @@
+name: Production pull request source
+on:
+  pull_request_target:
+    branches: [production]
+    types: [opened, reopened, synchronize, edited, ready_for_review]
+
+permissions:
+  statuses: write
+
+jobs:
+  source:
+    name: Verify production PR source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Require main from this repository
+        env:
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          HEAD_BRANCH: ${{ github.head_ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          result=success
+          if [[ "$HEAD_REPOSITORY" != "$GITHUB_REPOSITORY" || "$HEAD_BRANCH" != main ]]; then
+            result=failure
+          fi
+          gh api --silent --method POST "repos/$GITHUB_REPOSITORY/statuses/$PR_HEAD_SHA" \
+            -f state="$result" -f context='Production release from main' \
+            -f description='Production PRs must originate from main in this repository.' \
+            -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          test "$result" = success

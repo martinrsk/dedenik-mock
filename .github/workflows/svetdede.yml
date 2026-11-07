@@ -1,0 +1,67 @@
+name: Check theme and deploy Svet Dede
+
+on:
+  pull_request:
+    branches: [main]
+    paths: ['wp-content/themes/dedenik/**', 'wordpress/**', '.github/workflows/svetdede.yml']
+  push:
+    branches: [main]
+    paths: ['wp-content/themes/dedenik/**', 'wordpress/**', '.github/workflows/svetdede.yml']
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Only verify FTPS access, without uploading files'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: svetdede-theme
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Check PHP syntax
+        run: find wp-content/themes/dedenik -name '*.php' -print0 | xargs -0 -n1 php -n -l
+      - name: Check theme behavior
+        run: php -n wordpress/tests/theme-behavior.php
+      - name: Check AI search isolation and budgets
+        run: php wordpress/tests/ai-search-behavior.php
+      - name: Check deployment boundaries
+        run: python3 -m unittest discover -s wordpress/tests -p 'test_deploy.py'
+      - name: Build installation ZIP
+        run: python3 wordpress/package-theme.py
+
+  deploy:
+    needs: check
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && vars.SVETDEDE_AUTO_DEPLOY == 'true'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment:
+      name: svetdede
+      url: https://svetdede.dedenik.cz/
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Deploy theme over verified FTPS
+        env:
+          SVETDEDE_FTP_HOST: ${{ secrets.SVETDEDE_FTP_HOST }}
+          SVETDEDE_FTP_USER: ${{ secrets.SVETDEDE_FTP_USER }}
+          SVETDEDE_FTP_PASSWORD: ${{ secrets.SVETDEDE_FTP_PASSWORD }}
+          SVETDEDE_FTP_PORT: ${{ vars.SVETDEDE_FTP_PORT || '21' }}
+          DEPLOY_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'true' || 'false' }}
+        run: |
+          if [ "$DEPLOY_DRY_RUN" = true ]; then
+            python3 wordpress/deploy-svetdede.py --dry-run
+          else
+            python3 wordpress/deploy-svetdede.py --apply
+          fi

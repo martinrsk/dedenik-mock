@@ -1,0 +1,30 @@
+name: Build staging discussion index
+on:
+  workflow_dispatch:
+    inputs:
+      resume:
+        description: 'Continue an interrupted initial build from the first missing public comment'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: svetdede-theme
+  cancel-in-progress: false
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    environment: svetdede
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Build and verify public discussion index
+        env:
+          SVETDEDE_FTP_HOST: ${{ secrets.SVETDEDE_FTP_HOST }}
+          SVETDEDE_FTP_USER: ${{ secrets.SVETDEDE_FTP_USER }}
+          SVETDEDE_FTP_PASSWORD: ${{ secrets.SVETDEDE_FTP_PASSWORD }}
+          SVETDEDE_FTP_PORT: ${{ vars.SVETDEDE_FTP_PORT || '21' }}
+        run: python3 scripts/build-search-index.py --comments ${{ inputs.resume && '--resume' || '' }}

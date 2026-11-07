@@ -1,32 +1,50 @@
 # Práce na Dedeníku
 
-Repozitář `PN99/dedenik-mock` má dvě větve s odlišným uspořádáním souborů. Před úpravou si vyber cílový web.
+V repozitáři `PN99/dedenik-mock` začíná každá úprava na větvi odvozené z `main`. Na `main` i `production` má šablona stejnou cestu `wp-content/themes/dedenik/`. Vlastní automaticky načítané pluginy WordPressu patří do `wp-content/mu-plugins/`.
 
-| Cíl změny | Větev | Kde upravovat |
+| Větev | Web | Co nasazují GitHub Actions |
 | --- | --- | --- |
-| Vývoj a test na [Světě Dede](https://svetdede.dedenik.cz/) | `main` (výchozí) | Šablona `wordpress/dedenik/` |
-| Veřejný náhled [Dedeník /new](https://dedenik.cz/new/) | `production` | Šablona `wp-content/themes/dedenik/`, pravidla náhledu ve `wp-content/mu-plugins/` |
+| `main` | [Svět Dede](https://svetdede.dedenik.cz/) | Provozní soubory šablony Dedeník |
+| `production` | [Veřejný náhled Dedeníku](https://dedenik.cz/new/) | Změněné provozní soubory šablony a MU pluginů do `/public_html/www/new/` |
 
-## První změna
+## 1. Připrav změnu do main
 
-Přihlas se na GitHub vlastním účtem. Pro odesílání větví přímo do repozitáře potřebuješ oprávnění **Write**, které ti může přidělit správce. Těmito příkazy si stáhneš kód náhledu a založíš pracovní větev.
+Pro první práci naklonuj repozitář. V existujícím klonu začni příkazem `git fetch origin` a vytvoř novou pracovní větev až po uložení své rozpracované práce.
 
 ```sh
-git clone --branch production https://github.com/PN99/dedenik-mock.git dedenik-new
-cd dedenik-new
-git switch -c uprava/nazev-zmeny
+git clone https://github.com/PN99/dedenik-mock.git
+cd dedenik-mock
+git fetch origin
+git switch -c uprava/nazev-zmeny origin/main
 ```
 
-Po úpravě zkontroluj rozdíly pomocí `git diff`, přidej jednotlivé změněné soubory a vytvoř commit. Odešli pracovní větev příkazem `git push -u origin HEAD`. Na GitHubu otevři pull request s cílovou větví `production`. Při práci na Světě Dede začni z aktuální větve `main` a jako cíl pull requestu vyber `main`.
+Uprav soubory, spusť příslušné testy a zkontroluj rozdíly pomocí `git diff`. Po přidání vybraných souborů a vytvoření commitu odešli pracovní větev a na GitHubu otevři pull request.
 
-## Nasazení a ověření
+```sh
+git push -u origin HEAD
+gh pr create --base main --head uprava/nazev-zmeny --fill
+```
 
-- Po sloučení změny šablony do `main` ji GitHub Actions po úspěšných kontrolách nasadí na Svět Dede. Až ji tam vyzkoušíš, založ pro převzetí změny větev z aktuální `production`. Přenes konkrétní úpravu z `wordpress/dedenik/` do odpovídajícího souboru pod `wp-content/themes/dedenik/`. Celou větev `main` do `production` neslučuj, kořeny větví obsahují jiné soubory.
-- Push do `production` spouští automatické nasazení změněných souborů, které šablona používá na webu, a MU pluginu do `/public_html/www/new/`. V GitHub Actions otevři běh **Dedeník /new** pro příslušný commit a ověř výsledek kontroly přenosu nanečisto i samotného nahrání. Potom přes HTTPS navštiv dotčenou stránku pod `/new/` a vyzkoušej změněné chování.
-- Náhled čte stávající produkční databázi. Přihlašovací údaje zůstávají na hostingu a v GitHub Secrets. Do Gitu nepatří `wp-config.php`, hesla, SQL zálohy ani média z `wp-content/uploads/`. Přepnutí hlavní domény se provádí samostatně po testech.
+## 2. Ověř změnu na Světě Dede
 
-Pokud kontrola ohlásí, že se soubor na hostingu liší od obou verzí v Gitu, porovnej tento soubor s větví `production` a nejdřív vyřeš rozdíl. Po přerušení přenosu otevři původní běh v Actions a použij **Re-run failed jobs**. Další push pak převezme změny od posledního dokončeného přenosu. Jádro WordPressu a běžné pluginy jsou také ve větvi `production`; jejich nasazení na hosting naplánuj zvlášť.
+Po sloučení pull requestu do `main` otevři v Actions běh **Check theme and deploy Svet Dede**. U změny šablony počkej na úspěšný přenos. Na dotčené stránce Světa Dede vyzkoušej požadované chování a poznamenej si URL a plné SHA ověřeného commitu na `main`. Změny určené jen pro náhled, například jeho MU plugin, otestuj před vydáním lokálně. [Svět Dede](https://svetdede.dedenik.cz/)
 
-**Zadání pro agenta**
+## 3. Vydej ověřenou main do production
 
-> Přečti AGENTS.md. Pro náhled /new vytvoř pracovní větev z aktuální origin/production. Uprav [popis změny], ověř [očekávané chování] a připrav pull request do production. Připoj konkrétní adresu a kroky, kterými změnu po nasazení ověřím.
+Pro vydání otevři nový pull request přímo z větve **`main`** do **`production`**. V GitHubu vyber **base: production** a **compare: main**. Pull request zahrnuje všechny dosud nevydané změny z `main`. Prohlédni celý rozdíl a do popisu přidej testovanou URL, výsledek a SHA. Pokud mezitím přibyl commit na `main`, ověř novou verzi na Světě Dede.
+
+```sh
+gh pr create --base production --head main --title "Vydání do /new" --body "Ověřeno na Světě Dede: doplň URL, výsledek a SHA."
+```
+
+Po úspěšných kontrolách vyber na GitHubu **Create a merge commit**. Tím se v historii obou větví zachová stejný vydaný commit. Do `production` se změny dostávají výhradně sloučením tohoto pull requestu. Podrobnosti v Actions ověř pro výsledný merge commit. V běhu **Dedeník /new** zkontroluj porovnání s hostingem, přenos přes FTPS a výsledek kontroly přes HTTPS. Otevři dotčenou stránku na veřejném náhledu a znovu vyzkoušej změněnou funkci. [Dedeník /new](https://dedenik.cz/new/)
+
+Při rozdílu mezi Gitem a souborem na hostingu nejdřív prověř ruční změnu na serveru. Po přerušení přenosu zopakuj původní běh přes **Re-run failed jobs**, aby dokončil stejnou revizi.
+
+## Soubory na hostingu
+
+Každá instalace má vlastní `wp-config.php`. Databázová hesla, média v `wp-content/uploads/`, databáze a zálohy zůstávají mimo Git. Přístupy k FTPS spravuje GitHub Secrets. Náhled v `/new` čte současnou produkční databázi. Nasazení jádra, běžných pluginů a změny serverového nastavení včetně konečného přepnutí hlavní domény mají samostatný postup.
+
+## Zadání pro kolegu nebo agenta
+
+> Přečti AGENTS.md. Z aktuální origin/main založ pracovní větev, uprav [požadavek], ověř [očekávané chování] a připrav PR do main. Po sloučení ověř [konkrétní stránku a krok] na Světě Dede. Pro vydání otevři PR z main do production a připoj testovanou URL, výsledek a SHA. Po vydání zkontroluj běh Dedeník /new a stejný krok na veřejném náhledu.
