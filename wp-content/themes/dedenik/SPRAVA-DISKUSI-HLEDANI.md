@@ -1,6 +1,6 @@
 # Hledání v diskusích (0.6.0)
 
-Od verze 0.6.2 vede kliknutí na jméno v diskusi na [veřejný přehled komentářů dané přezdívky](SPRAVA-DISKUTUJICICH.md). Nevyžaduje AI ani opakovanou indexaci.
+Kliknutím na jméno v diskusi se otevře [přehled komentářů se stejným jménem a e-mailem](SPRAVA-DISKUTUJICICH.md). Přehled používá přímo veřejné komentáře WordPressu. Vyhledávání podle tématu popsané níže používá vlastní index.
 
 Vedle článků se indexují veřejné schválené komentáře u publikovaných článků/stránek bez hesla. Pingbacky, trackbacky, čekající, spamové a smazané komentáře se vylučují. Samostatná tabulka s prefixem WordPressu `dedenik_search_comments` obsahuje pouze ID komentáře, ID článku/rodičovského komentáře, veřejnou přezdívku a její normalizovanou podobu, vyčištěný text a datum. Má FULLTEXT nad textem a běžné indexy článku, rodiče, přezdívky a data. Nemá pole pro e-mail, IP adresu nebo ID uživatelského účtu.
 

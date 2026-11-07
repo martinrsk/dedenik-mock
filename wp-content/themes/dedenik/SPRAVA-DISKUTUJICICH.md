@@ -1,11 +1,9 @@
-# Přehled komentářů podle přezdívky (0.6.2)
+# Přehled komentářů diskutujícího
 
-Jméno autora schváleného komentáře v diskusi vede na jeho veřejný přehled, například `/?diskutujici=YGA`. Výpis ukazuje počet komentářů, datum, název článku, úryvek a odkaz přímo na komentář. Řadí se od nejnovějších a stránkuje po 20. Další stránka používá `&disk_strana=2`. Odkaz lze sdílet a funguje bez JavaScriptu.
+Kliknutím na jméno pod článkem se otevře seznam veřejných komentářů se stejným jménem a e-mailem jako u vybraného příspěvku. Když Jana e-mail nevyplnila, zobrazí se příspěvky od Jany s prázdným e-mailem. Komentáře od Jany s vyplněnou adresou patří do samostatného seznamu. Dva lidé se stejným jménem a prázdným e-mailem budou ve společném seznamu.
 
-Využívá již hotový index diskusí. Není potřeba vytvářet stránky v administraci, obnovovat permalinky, měnit databázové schéma ani znovu indexovat komentáře. Výpis nepotřebuje AI klíč a nečerpá API limit. Při vypnutém chytrém hledání funguje dál, pokud je index diskusí připravený.
+Velikost písmen při porovnání nerozhoduje. Diakritika i znaky jako `%` nebo podtržítko jsou součástí jména.
 
-Komentáře se seskupují podle veřejné přezdívky stejně jako v indexu diskusí (bez rozlišení velikosti a diakritiky). Nejde o ověřený osobní profil: shodnou přezdívku může používat více lidí. E-maily, IP adresy ani ID účtů se pro spojování nepoužívají a nezobrazují se.
+Odkaz obsahuje jen veřejné ID výchozího komentáře, například `/?disk_komentar=123`. E-mail se porovnává uvnitř databáze. V adrese stránky ani ve výpisu se nezobrazuje. Přehled funguje i na náhledu v `/new` s databázovým účtem pro čtení. Původní sdílené odkazy `?diskutujici=Jana` si zachovávají svůj význam a používají původní index přezdívek.
 
-Zobrazují se pouze schválené komentáře u aktuálně veřejných článků/stránek bez hesla. Moderace a změny viditelnosti se ověřují i při otevření výpisu. Neznámé přezdívky a neexistující stránky mají HTTP 404. Není-li index připravený, vrací přehled HTTP 503 a jména v diskusích se nemění na nové odkazy. Administrace a RSS odkazy se nemění.
-
-Lokální ověření: `php -c local/php.ini mockup/wordpress/tests/discussants-integration.php C:/Projekty/Dedenik/local/site/wp-load.php`. Vyžaduje plně naplněný index v izolované lokální DB, testuje veřejnost, moderaci, stránkování, parametry URL i přezdívky s diakritikou a speciálními znaky. Nevolá Google.
+Na každé stránce je až 20 komentářů od nejnovějších, s datem, názvem článku, úryvkem a odkazem na příspěvek v diskusi. Zahrnují se schválené běžné komentáře u veřejných článků a stránek bez hesla. Pokud výchozí komentář přestane být veřejný, jeho odkaz na přehled vrátí HTTP 404.

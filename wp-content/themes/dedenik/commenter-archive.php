@@ -27,7 +27,9 @@ get_header();
     <?php endforeach; ?>
     </ol>
     <?php
-    $base = str_replace( '999999999', '%#%', dedenik_discussant_url( $context['name'], 999999999 ) );
+    $pagination_url = isset( $context['seed_id'] ) ? dedenik_discussant_comment_url( $context['seed_id'], 999999999 )
+        : dedenik_discussant_url( $context['name'], 999999999 );
+    $base = str_replace( 'disk_strana=999999999', 'disk_strana=%#%', $pagination_url );
     $links = paginate_links( array( 'base' => $base, 'format' => '', 'current' => $context['page'], 'total' => $context['pages'], 'mid_size' => 1, 'end_size' => 1, 'prev_text' => '← Novější', 'next_text' => 'Starší →' ) );
     if ( $links ) { echo '<nav class="pagination" aria-label="Stránkování komentářů diskutujícího">' . $links . '</nav>'; }
     ?>
