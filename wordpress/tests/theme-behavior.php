@@ -76,15 +76,16 @@ check(strpos($html, 'category/507/') === false && strpos($html, 'category/512/')
 // Featured authors resolve editorial tag identities, not publishing accounts.
 function get_term_link($term) { return 'https://example.test/tag/'.$term->slug.'/'; }
 function wp_html_excerpt($value,$length,$more) { preg_match('/^./us',$value,$first); return $first[0] ?? ''; }
-$author_names = array('Dede','Matylda','EvaB','Netopýrka','Tora','Pů','Yga','Alex','MartinR','Neviathiel','Aries','a další');
-$author_slugs = array('dagmar-ruscakova','matylda','evab','netopyrka','tora','pu','yga','alex','martinr','neviathiel','aloisie-trpkosova-aries');
+$author_names = array('Dede','Matylda','EvaB','Netopýrka','Tora','Pů','Yga','Alex','MartinR','DavidL','Aries','a další');
+$author_slugs = array('dagmar-ruscakova','matylda','evab','netopyrka','tora','pu','yga','alex','martinr','davidl','aloisie-trpkosova-aries');
 foreach ($author_slugs as $slug) { $fixture_terms['post_tag'][$slug] = (object)array('slug'=>$slug); }
 ob_start(); require $theme_dir . '/template-parts/authors.php'; $html=ob_get_clean();
 preg_match_all('/<span>([^<]+)<\/span><\/a>/', $html, $labels);
 check($labels[1] === $author_names, 'Featured authors preserve all eleven names, editorial order and final more link');
 check(strpos($html, 'href="https://example.test/tag/dagmar-ruscakova/"') !== false && strpos($html, 'href="https://example.test/tag/aloisie-trpkosova-aries/"') !== false, 'Dede and Aries resolve their actual author tags');
+check(strpos($html, 'href="https://example.test/tag/davidl/"><span class="author-initial" aria-hidden="true">D</span><span>DavidL</span></a>') !== false, 'DavidL links to the editorial author tag');
 check(strpos($html, 'https://www.dedenik.cz/#f2-tagcloud-2') !== false, 'More authors links to the complete author list');
-$fixture_terms['post_tag']['neviathiel'] = new Exception('missing');
+$fixture_terms['post_tag']['davidl'] = new Exception('missing');
 ob_start(); require $theme_dir . '/template-parts/authors.php'; $html=ob_get_clean();
-check(strpos($html, 'aria-disabled="true"') !== false && strpos($html, 'href="https://example.test/tag/neviathiel/"') === false, 'Missing author tag is visible without a fabricated archive link');
+check(strpos($html, 'aria-disabled="true"') !== false && strpos($html, 'href="https://example.test/tag/davidl/"') === false, 'Missing author tag is visible without a fabricated archive link');
 echo 'Passed '.$tests." offline behavior checks\n";
