@@ -3,7 +3,6 @@
 <?php dedenik_widget_area( 'widgets_before_post' ); ?>
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'full-article' ); ?>>
 <header class="article-header"><?php dedenik_primary_category(); ?><h1><?php the_title(); ?></h1><?php dedenik_metadata(); ?></header>
-<?php if ( has_post_thumbnail() && ! post_password_required() ) { the_post_thumbnail( 'large', array( 'class' => 'article-image' ) ); } ?>
 <?php dedenik_widget_area( 'widgets_before_post_content' ); ?>
 <div class="entry-content"><?php the_content(); wp_link_pages( array( 'before' => '<nav class="page-links" aria-label="' . esc_attr__( 'Stránky článku', 'dedenik' ) . '">', 'after' => '</nav>' ) ); ?></div>
 <?php dedenik_widget_area( 'widgets_after_post_content' ); ?>
