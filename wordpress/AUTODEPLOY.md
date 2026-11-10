@@ -1,33 +1,23 @@
-# Autodeploy šablony na Svět Dede
+# Nasazení šablony Dedeník
 
-GitHub Actions workflow **Check theme and deploy Svet Dede** kontroluje PHP, testy a vytvoření ZIPu. Při zapnutém autodeployi po pushi do `main` přenese pouze runtime soubory šablony přes FTPS s kontrolou certifikátu. Nakonec ověří verzi CSS a dostupnost homepage přes HTTPS.
+Workflow **Check and deploy Dedeník theme** v `.github/workflows/svetdede.yml` kontroluje syntaxi PHP, chování šablony a AI vyhledávání, hranice nasazení a sestavení instalačního ZIPu. Po přesunu šablony v repozitáři je jediným zdrojem přenosu `wp-content/themes/dedenik/`, dříve `wordpress/dedenik/`.
 
-Pevný cíl je `/public_html/svetdede/wp-content/themes/dedenik`. Skript nepřijímá alternativní vzdálenou cestu, nepřipojuje se k databázi a nevyměňuje WordPress jádro, uploads ani wp-config.php. Žádné soubory na serveru nemaže. Před prvním přenosem ověří, že v cíli už je šablona Dedeník. Staré soubory, které budou z Gitu později odstraněné, se tímto způsobem automaticky nemažou.
+| Větev | Web | Environment | Cílový adresář FTPS |
+| --- | --- | --- | --- |
+| `test` | [Svět Dede](https://svetdede.dedenik.cz/) | `svetdede` | `/public_html/svetdede/wp-content/themes/dedenik` |
+| `main` | [Dedeník](https://dedenik.cz/) | `dedenik-production` | `/public_html/www/new/wp-content/themes/dedenik` |
 
-## První zapnutí
+## Přechod a ověření
 
-V repozitáři **PN99/dedenik-mock** otevřete **Settings → Secrets and variables → Actions**. Přidejte tyto repository secrets:
+1. Ve [Settings → Secrets and variables → Actions](https://github.com/martinrsk/dedenik-mock/settings/secrets/actions) ověř názvy `SVETDEDE_FTP_HOST`, `SVETDEDE_FTP_USER` a `SVETDEDE_FTP_PASSWORD` u repozitáře nebo prostředí `svetdede`. Výchozí port explicitního FTPS je 21. Odlišný port nastav v `SVETDEDE_FTP_PORT`. Použij hostname odpovídající certifikátu. Původní ověření Světa Dede používalo `dw132.nameserver.sk`.
+2. V [Actions](https://github.com/martinrsk/dedenik-mock/actions/workflows/svetdede.yml) ručně spusť workflow z `test` s `dry_run=true`. Log má potvrdit TLS, přihlášení, adresář, identitu šablony a počet připravených souborů. Ruční spuštění z `test` dovoluje výhradně režim čtení. Proměnná repozitáře `DEDENIK_TEST_AUTO_DEPLOY=true` povolí zápis až při pozdějším pushi se změnou ve zdrojovém adresáři šablony po úspěšných kontrolách. Založení větve, force push, přidání samotné proměnné a změny dokumentace nebo workflow přenos nespustí.
+3. Hlavní doménu obsluhuje instalace `/new/`. Dosavadní produkční běh použil FTPS kořen `/public_html/www/new/`. U vyhrazeného produkčního FTPS účtu ověř v dry runu, že tento účet vidí adresář šablony uvedený v tabulce. [Dosavadní produkční běh](https://github.com/martinrsk/dedenik-mock/actions/runs/42406483691)
+4. V [Settings → Environments](https://github.com/martinrsk/dedenik-mock/settings/environments) vytvoř `dedenik-production` a před přidáním údajů omez deployment branches na jedinou větev `main`, bez povolených tagů. Použij pravidla ochrany `main` pro změny workflow. Výhradně do tohoto prostředí ulož secrets `DEDENIK_FTP_HOST`, `DEDENIK_FTP_USER` a `DEDENIK_FTP_PASSWORD`. Proměnná prostředí `DEDENIK_FTP_THEME_PATH` musí obsahovat ověřenou absolutní cestu končící `/wp-content/themes/dedenik`. Volitelný `DEDENIK_FTP_PORT` má výchozí hodnotu 21.
+5. Produkční ověření spouštěj až po schváleném začlenění workflow do `main`. Ručně vyber větev `main` a `dry_run=true`. Workflow vyžaduje shodu FTPS kopie `style.css` se souborem obsluhovaným přímo z `https://dedenik.cz/`. Shoda doplňuje ověření kořene domény v hostingu. Po ověření a schválení prvního zápisu nastav proměnnou repozitáře `DEDENIK_PRODUCTION_DEPLOY=true`.
+6. Při přepnutí cesty vydávání deaktivuj dřívější workflow **Dedeník /new** pro větev `production` v nastavení Actions. Do začlenění nové konfigurace má kopie `svetdede.yml` na `main` stále původní chování. Do té doby ji z `main` nespouštěj s vypnutým `dry_run`.
 
-| Secret | Hodnota |
-| --- | --- |
-| `SVETDEDE_FTP_HOST` | Hostname FTP serveru z Webglobe, bez `ftp://`, portu a cesty |
-| `SVETDEDE_FTP_USER` | Uživatelské jméno stávajícího FTP účtu |
-| `SVETDEDE_FTP_PASSWORD` | Heslo FTP účtu, nikoli heslo databáze nebo wp-adminu |
+## Produkční vydání
 
-Volitelná repository variable `SVETDEDE_FTP_PORT` určuje port; výchozí je 21 pro explicitní FTPS. Použitý FTP účet musí vidět cestu `/public_html/svetdede/wp-content/themes/dedenik`, jako účet na dosavadním screenshotu Total Commanderu. Pokud má účet jiný kořen, je třeba cestu nejprve ověřit a skript upravit; nezapínejte nasazení naslepo.
+Postup schválení a sloučení konkrétního commitu je v [AGENTS.md](../AGENTS.md). Po sloučení ručně spusť **Check and deploy Dedeník theme** z aktuální `main` s `dry_run=false` a číslem sloučeného PR v `release_pr`. Workflow ověří úspěšné kontroly, zdroj `test` ze stejného repozitáře, cílovou větev `main`, SHA výsledného sloučení, schválené SHA v popisu PR a shodu stromu šablony mezi schváleným a výsledným commitem. Před přenosem znovu ověří, že výsledný commit je stále na špičce `main`. Samotný push do `main` ani otevření PR produkční zápis nespustí.
 
-1. V **Actions → Check theme and deploy Svet Dede → Run workflow** vyberte `main` a ponechte **dry_run** zapnutý. Tento běh ověří připojení a existující šablonu, nic nenahraje.
-2. Po úspěchu spusťte jednou stejné workflow s **dry_run** vypnutým. To provede první nasazení a ověření webu.
-3. Teprve potom přidejte repository variable **`SVETDEDE_AUTO_DEPLOY`** s hodnotou **`true`**. Další změny `wordpress/**` v `main` se nasadí automaticky. Chybějící proměnná nebo hodnota jiná než `true` automatické nasazení vypíná.
-
-Není potřeba ukládat DB heslo ani přihlašovací údaje WordPressu. FTP heslo nedávejte do souborů, commitů ani do textu workflow. GitHub environment `svetdede` eviduje cíl nasazení. Kontroly běží i pro pull requesty, nasazení jen z `main`. Souběžné běhy se řadí za sebe.
-
-## Certifikát FTP a selhání
-
-FTP server musí podporovat explicitní TLS. Skript nikdy nepřejde na nešifrované FTP a nevypíná ověřování certifikátu. Když alias `ftp.dedenik.cz` neodpovídá certifikátu, použijte platný serverový hostname uvedený Webglobe. Logy záměrně nevypisují FTP přihlašovací údaje ani celé odpovědi serveru.
-
-Při zprovoznění 20. října 2026 byl pro tento hosting ověřen **`dw132.nameserver.sk`**: DNS vede na stejný server jako `ftp.dedenik.cz`, ale tento název odpovídá jeho TLS certifikátu. Secret `SVETDEDE_FTP_HOST` byl upraven na ověřený název. Přihlášení stávajícím FTP účtem a čtení cílové šablony prošlo dry runem.
-
-FTP nasazení není atomická výměna celé šablony. Soubory se nejprve nahrají do dočasného souboru a potom přejmenují, závislosti před vstupními soubory. Při chybě se běh zastaví, část souborů může být už aktualizovaná. Pro návrat vraťte příslušný commit v Gitu a znovu spusťte deployment. Nepoužívejte force push na sdílenou `main`.
-
-Dokumentace: [GitHub deployment workflow](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/control-deployments), [GitHub secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).
+FTPS vyžaduje důvěryhodný TLS certifikát i šifrovaný datový kanál. `dry_run` používá jen čtení. Ostrý přenos nahrává provozní soubory šablony do dočasných jmen a přejmenovává je po jednotlivých souborech. Při chybě se běh zastaví a část šablony může být aktualizovaná. Po úspěchu ověří veřejný stylesheet a úvodní stránku přes HTTPS. Staré soubory zůstávají na serveru. Přístupové údaje uchovávej v GitHub Secrets.

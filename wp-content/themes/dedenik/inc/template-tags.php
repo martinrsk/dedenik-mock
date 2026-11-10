@@ -4,9 +4,27 @@ require_once __DIR__ . '/world.php';
 function dedenik_widget_area( $id ) {
     if ( is_active_sidebar( $id ) ) {
         echo '<div class="widget-area widget-area-' . esc_attr( $id ) . '">';
+        $post_sidebar = in_array( $id, array( 'widgets_sidebar_left', 'widgets_sidebar_right' ), true ) && is_singular( 'post' );
+        if ( $post_sidebar ) { add_filter( 'wp_get_attachment_image_attributes', 'dedenik_sidebar_thumbnail_source', 10, 3 ); }
         dynamic_sidebar( $id );
+        if ( $post_sidebar ) { remove_filter( 'wp_get_attachment_image_attributes', 'dedenik_sidebar_thumbnail_source' ); }
         echo '</div>';
     }
+}
+// A Category Posts thumbnail can already be hard-cropped to a square on disk.
+function dedenik_sidebar_thumbnail_source( $attr, $attachment, $size ) {
+    if ( 'thumbnail' !== $size || ! isset( $attr['data-cat-posts-width'], $attr['data-cat-posts-height'] ) ) { return $attr; }
+    $src = wp_get_attachment_image_url( $attachment->ID, 'medium_large' );
+    if ( ! $src ) { return $attr; }
+    $attr['src'] = $src;
+    unset( $attr['srcset'], $attr['sizes'] );
+    $srcset = wp_get_attachment_image_srcset( $attachment->ID, 'medium_large' );
+    if ( $srcset ) {
+        $attr['srcset'] = $srcset;
+        $width = absint( $attr['data-cat-posts-width'] );
+        $attr['sizes'] = $width ? $width . 'px' : '100vw';
+    }
+    return $attr;
 }
 function dedenik_menu_args( $location ) {
     $args = array( 'theme_location' => $location, 'container' => false, 'menu_class' => 'menu', 'fallback_cb' => false, 'depth' => 3 );

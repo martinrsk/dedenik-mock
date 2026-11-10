@@ -32,6 +32,23 @@ function dedenik_assets() {
     }
 }
 add_action( 'wp_enqueue_scripts', 'dedenik_assets' );
+// "Zobrazit další" renders more Category Posts items in a separate REST request.
+function dedenik_sidebar_loadmore_images( $response, $handler, $request ) {
+    if ( ! preg_match( '~^/categoryPosts/loadmore/widget-(\d+)/\d+/\d+/(\d+)/?$~', $request->get_route(), $matches )
+        || ! (int) $matches[2] || 'post' !== get_post_type( (int) $matches[2] ) ) { return $response; }
+    $sidebars = wp_get_sidebars_widgets();
+    $widgets = array_merge( $sidebars['widgets_sidebar_left'] ?? array(), $sidebars['widgets_sidebar_right'] ?? array() );
+    if ( in_array( 'category-posts-' . $matches[1], $widgets, true ) ) {
+        if ( doing_filter( 'rest_request_before_callbacks' ) ) {
+            add_filter( 'wp_get_attachment_image_attributes', 'dedenik_sidebar_thumbnail_source', 10, 3 );
+        } else {
+            remove_filter( 'wp_get_attachment_image_attributes', 'dedenik_sidebar_thumbnail_source' );
+        }
+    }
+    return $response;
+}
+add_filter( 'rest_request_before_callbacks', 'dedenik_sidebar_loadmore_images', 10, 3 );
+add_filter( 'rest_request_after_callbacks', 'dedenik_sidebar_loadmore_images', 10, 3 );
 // The archive contains long legacy texts; keep card summaries close to the mockup.
 function dedenik_excerpt_length( $length ) {
     return ( is_home() || is_archive() || is_search() ) ? 28 : $length;
