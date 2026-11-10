@@ -1,34 +1,53 @@
-name: Check theme and deploy Svet Dede
+name: Check and deploy Dedeník theme
 
 on:
   pull_request:
     branches: [main]
     paths: ['wp-content/themes/dedenik/**', 'wordpress/**', '.github/workflows/svetdede.yml']
   push:
-    branches: [main]
+    branches: [test]
     paths: ['wp-content/themes/dedenik/**', 'wordpress/**', '.github/workflows/svetdede.yml']
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Only verify FTPS access, without uploading files'
+        description: 'Verify FTPS without uploading. Required on test.'
         type: boolean
         default: true
+      release_pr:
+        description: 'Merged test → main PR number, required for a production upload'
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: svetdede-theme
+  group: ${{ github.ref == 'refs/heads/main' && 'dedenik-production-theme' || 'svetdede-theme' }}
   cancel-in-progress: false
 
 jobs:
   check:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    outputs:
+      theme_changed: ${{ steps.changes.outputs.theme_changed }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
+          fetch-depth: 0
           persist-credentials: false
+      - name: Detect theme changes in the push
+        id: changes
+        if: github.event_name == 'push' && !github.event.created && !github.event.forced
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if git diff --quiet "$BEFORE" "$GITHUB_SHA" -- wp-content/themes/dedenik/; then
+            echo 'theme_changed=false' >> "$GITHUB_OUTPUT"
+          else
+            status=$?
+            test "$status" = 1
+            echo 'theme_changed=true' >> "$GITHUB_OUTPUT"
+          fi
       - name: Check PHP syntax
         run: find wp-content/themes/dedenik -name '*.php' -print0 | xargs -0 -n1 php -n -l
       - name: Check theme behavior
@@ -40,9 +59,14 @@ jobs:
       - name: Build installation ZIP
         run: python3 wordpress/package-theme.py
 
-  deploy:
+  test:
+    name: FTPS for Svět Dede
     needs: check
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && vars.SVETDEDE_AUTO_DEPLOY == 'true'))
+    if: >-
+      github.repository == 'martinrsk/dedenik-mock' && github.ref == 'refs/heads/test' &&
+      ((github.event_name == 'workflow_dispatch' && inputs.dry_run) ||
+      (github.event_name == 'push' && needs.check.outputs.theme_changed == 'true' &&
+      vars.DEDENIK_TEST_AUTO_DEPLOY == 'true'))
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     environment:
@@ -58,10 +82,78 @@ jobs:
           SVETDEDE_FTP_USER: ${{ secrets.SVETDEDE_FTP_USER }}
           SVETDEDE_FTP_PASSWORD: ${{ secrets.SVETDEDE_FTP_PASSWORD }}
           SVETDEDE_FTP_PORT: ${{ vars.SVETDEDE_FTP_PORT || '21' }}
-          DEPLOY_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'true' || 'false' }}
         run: |
-          if [ "$DEPLOY_DRY_RUN" = true ]; then
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
             python3 wordpress/deploy-svetdede.py --dry-run
           else
             python3 wordpress/deploy-svetdede.py --apply
+          fi
+
+  verify_release:
+    name: Verify approved production commit
+    needs: check
+    if: >-
+      github.repository == 'martinrsk/dedenik-mock' && github.ref == 'refs/heads/main' &&
+      github.event_name == 'workflow_dispatch' && !inputs.dry_run && vars.DEDENIK_PRODUCTION_DEPLOY == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify the merged PR and the exact theme approved on test
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_PR: ${{ inputs.release_pr }}
+        run: |
+          [[ "$RELEASE_PR" =~ ^[1-9][0-9]*$ ]]
+          pr=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$RELEASE_PR")
+          approved=$(jq -er --arg repo "$GITHUB_REPOSITORY" --arg sha "$GITHUB_SHA" '
+            select(.merged and .merge_commit_sha == $sha and
+              .base.ref == "main" and .head.ref == "test" and .head.repo.full_name == $repo)
+            | .head.sha as $head
+            | select((.body // "" | gsub("\r"; "") | split("\n") | index("Approved-Theme-Commit: " + $head)) != null)
+            | $head' <<< "$pr")
+          test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)" = "$GITHUB_SHA"
+          theme=wp-content/themes/dedenik
+          test "$(git rev-parse "$approved:$theme")" = "$(git rev-parse "$GITHUB_SHA:$theme")"
+          echo "Verified approved theme commit $approved from PR #$RELEASE_PR."
+
+  production:
+    name: FTPS for dedenik.cz
+    needs: [check, verify_release]
+    if: >-
+      !cancelled() && github.repository == 'martinrsk/dedenik-mock' &&
+      github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' &&
+      needs.check.result == 'success' &&
+      (inputs.dry_run || needs.verify_release.result == 'success')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment:
+      name: dedenik-production
+      url: https://dedenik.cz/
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Verify or deploy the production theme over FTPS
+        env:
+          DEDENIK_FTP_HOST: ${{ secrets.DEDENIK_FTP_HOST }}
+          DEDENIK_FTP_USER: ${{ secrets.DEDENIK_FTP_USER }}
+          DEDENIK_FTP_PASSWORD: ${{ secrets.DEDENIK_FTP_PASSWORD }}
+          DEDENIK_FTP_PORT: ${{ vars.DEDENIK_FTP_PORT || '21' }}
+          DEDENIK_FTP_THEME_PATH: ${{ vars.DEDENIK_FTP_THEME_PATH }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$DRY_RUN" = true ]; then
+            python3 wordpress/deploy-svetdede.py --target production --dry-run
+          else
+            test "$DRY_RUN" = false
+            test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)" = "$GITHUB_SHA"
+            python3 wordpress/deploy-svetdede.py --target production --apply
           fi
