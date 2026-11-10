@@ -706,6 +706,12 @@ h3 {
 .widget img {
   max-width:100%
 }
+.single-post .community-sidebar .cat-post-thumbnail .cat-post-crop img {
+  /* Category Posts sets a pixel height inline on load and resize. */
+  height:auto !important;
+  aspect-ratio:2.65 / 1;
+  object-fit:cover !important
+}
 .widget input,.widget select {
   max-width:100%
 }
