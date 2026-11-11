@@ -4,6 +4,8 @@ wp-config*.php
 wp-config.php.*
 .env
 .env.*
+/.env1
+/.token_acess
 .htpasswd*
 .htdigest*
 .user.ini
