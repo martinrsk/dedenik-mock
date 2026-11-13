@@ -32,7 +32,9 @@ try {
     $archive = dedenik_discussant_archive( $name );
     discussant_check( $archive['total'] === 22 && count( $archive['records'] ) === 20 && count( dedenik_discussant_archive( $name, 2 )['records'] ) === 2, 'All matching public comments and only those comments paginate' );
     $link = get_comment_author_link( $comments[0] );
-    discussant_check( str_contains( $link, 'disk_komentar=' . $comments[0] ) && ! str_contains( $link, 'example.invalid/blog' ) && str_contains( $link, '&amp;' ), 'Author link points to local archive with escaped public label' );
+    $profile = dedenik_reader_profile( get_comment( $comments[0] ) );
+    $archive_link = str_contains( $link, 'disk_komentar=' . $comments[0] ) || str_contains( $link, 'disk_profil=' . $profile );
+    discussant_check( $archive_link && ! str_contains( $link, 'example.invalid/blog' ) && str_contains( $link, '&amp;' ), 'Author link points to local archive with escaped public label' );
     $url = html_entity_decode( dedenik_discussant_url( $name, 2 ), ENT_QUOTES, 'UTF-8' );
     parse_str( wp_parse_url( $url, PHP_URL_QUERY ), $params );
     discussant_check( $params['diskutujici'] === $name && (int) $params['disk_strana'] === 2, 'URL roundtrips Unicode, ampersands and quotes' );
@@ -56,7 +58,8 @@ try {
         $next_html = file_get_contents( $next_url );
         discussant_check( substr_count( $next_html, 'data-comment-id=' ) === 2, 'HTTP next page has remaining comments' );
     }
-    discussant_check( ! str_contains( get_comment_author_link( $comments[22] ), 'disk_komentar=' ) && ! str_contains( get_comment_author_link( $comments[22] ), 'diskutujici=' ), 'No archive links for unapproved comment' );
+    $hidden_link = get_comment_author_link( $comments[22] );
+    discussant_check( ! preg_match( '/(?:disk_komentar|disk_profil|diskutujici)=/', $hidden_link ), 'No archive links for unapproved comment' );
     discussant_check( ! str_contains( wp_json_encode( $archive ), 'hidden@example.invalid' ) && ! str_contains( wp_json_encode( $archive ), '192.0.2.42' ), 'No email, IP or account metadata returned' );
     $wpdb->update( $wpdb->comments, array( 'comment_approved' => '0' ), array( 'comment_ID' => $comments[0] ) ); clean_comment_cache( $comments[0] );
     discussant_check( dedenik_discussant_archive( $name )['total'] === 21, 'Live moderation excludes stale indexed row' );
