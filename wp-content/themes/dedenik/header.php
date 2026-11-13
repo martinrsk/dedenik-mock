@@ -32,6 +32,41 @@ $distinct_top = $top_id && $top_id !== $primary_id;
     <?php $top_menu = $distinct_top ? wp_nav_menu( array_merge( $top_args, array( 'echo' => false ) ) ) : ''; if ( $top_menu ) : ?>
         <nav id="secondary-menu" class="secondary-navigation wrap" aria-label="<?php esc_attr_e( 'Doplňková navigace', 'dedenik' ); ?>"><?php echo $top_menu; ?></nav>
     <?php endif; ?>
+    <?php
+    // Keep the first deployment deadline even if the theme is deployed again.
+    $notice_key = 'dedenik_hosting_notice_20261113_until';
+    $notice_until = get_option( $notice_key, false );
+    if ( false === $notice_until ) {
+        $notice_until = min( time(), (int) filemtime( __FILE__ ) ) + DAY_IN_SECONDS;
+        if ( ! add_option( $notice_key, $notice_until, '', false ) ) {
+            $notice_until = get_option( $notice_key, 0 );
+        }
+    }
+    if ( time() < (int) $notice_until ) :
+    ?>
+    <div id="dedenik-hosting-notice" class="hosting-notice" data-until="<?php echo esc_attr( (string) $notice_until ); ?>">
+        <img class="hosting-notice__cat" src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/kocicka.png' ); ?>" alt="" width="498" height="350">
+        <span class="hosting-notice__text">Omlouváme se za výpadky, jsou na straně poskytovatele</span>
+    </div>
+    <script>
+    (() => {
+        const notice = document.getElementById('dedenik-hosting-notice');
+        const until = Number(notice.dataset.until) * 1000;
+        const update = () => {
+            const remaining = until - Date.now();
+            if (remaining <= 0) {
+                notice.remove();
+                return;
+            }
+            window.setTimeout(update, Math.min(remaining, 86400000));
+        };
+        update();
+        window.addEventListener('pageshow', () => {
+            if (Date.now() >= until) notice.remove();
+        });
+    })();
+    </script>
+    <?php endif; ?>
 </header>
 <div class="wrap"><?php dedenik_widget_area( 'widgets_header' ); dedenik_widget_area( 'widgets_below_menu' ); ?></div>
 <main id="main" tabindex="-1">
