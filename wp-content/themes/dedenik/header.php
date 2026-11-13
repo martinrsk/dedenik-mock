@@ -44,8 +44,9 @@ $distinct_top = $top_id && $top_id !== $primary_id;
     }
     if ( time() < (int) $notice_until ) :
     ?>
-    <div id="dedenik-hosting-notice" data-until="<?php echo esc_attr( (string) $notice_until ); ?>" style="background:#b51f32;color:#fff;padding:.6em 1em;text-align:center;font-weight:600;line-height:1.4">
-        Omlouváme se za dnešní výpadky, jsou na straně hostingu.
+    <div id="dedenik-hosting-notice" class="hosting-notice" data-until="<?php echo esc_attr( (string) $notice_until ); ?>">
+        <img class="hosting-notice__cat" src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/kocicka.png' ); ?>" alt="" width="498" height="350">
+        <span class="hosting-notice__text">Omlouváme se za dnešní výpadky, jsou na straně hostingu.</span>
     </div>
     <script>
     (() => {

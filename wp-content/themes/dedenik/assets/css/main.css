@@ -119,6 +119,48 @@ h3 {
   background:var(--navy);
   color:white
 }
+.hosting-notice {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:12px;
+  padding-inline:12px;
+  background:#b51f32;
+  color:#fff;
+  text-align:center;
+  font-weight:600;
+  line-height:1.4
+}
+.hosting-notice__cat {
+  position:relative;
+  z-index:1;
+  align-self:flex-end;
+  flex:none;
+  width:100px;
+  height:auto;
+  margin-block:-15px -8px;
+  pointer-events:none;
+  filter:drop-shadow(0 0 1px #fff)
+}
+.hosting-notice__text {
+  min-width:0;
+  padding-block:6px;
+  text-wrap:balance
+}
+@media (max-width:36rem) {
+  .hosting-notice {
+    gap:8px;
+    padding-inline:8px;
+    font-size:.875rem;
+    text-align:left
+  }
+  .hosting-notice__cat {
+    width:112px
+  }
+  .hosting-notice__text {
+    padding-block:3px
+  }
+}
 .header-inner {
   display:flex;
   align-items:center;
