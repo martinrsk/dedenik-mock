@@ -138,7 +138,7 @@ h3 {
   flex:none;
   width:100px;
   height:auto;
-  margin-block:-15px -8px;
+  margin-block:-24px -5px;
   pointer-events:none;
   filter:drop-shadow(0 0 1px #fff)
 }
