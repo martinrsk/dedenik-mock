@@ -1,0 +1,53 @@
+name: Upload standalone PHP connection test
+on:
+  push:
+    branches: [test]
+    paths: ['.github/workflows/php-connection-test.yml']
+permissions:
+  contents: read
+jobs:
+  upload:
+    if: github.repository == 'martinrsk/dedenik-mock'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    environment: svetdede
+    steps:
+      - name: Upload only test.php over verified FTPS
+        env:
+          FTP_HOST: ${{ secrets.SVETDEDE_FTP_HOST }}
+          FTP_USER: ${{ secrets.SVETDEDE_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.SVETDEDE_FTP_PASSWORD }}
+          FTP_PORT: ${{ vars.SVETDEDE_FTP_PORT || '21' }}
+        run: |
+          python3 - <<'PY'
+          import ftplib, io, os, ssl, sys
+          content = b'<?php echo "connection test";'
+          try:
+              with ftplib.FTP_TLS(context=ssl.create_default_context(), timeout=25) as ftp:
+                  ftp.connect(os.environ['FTP_HOST'], int(os.environ['FTP_PORT']))
+                  ftp.login(os.environ['FTP_USER'], os.environ['FTP_PASSWORD'])
+                  ftp.prot_p()
+                  ftp.cwd('/public_html/svetdede')
+                  names = {name.rsplit('/', 1)[-1] for name in ftp.nlst()}
+                  if 'test.php' in names:
+                      existing = io.BytesIO()
+                      ftp.retrbinary('RETR test.php', existing.write)
+                      if existing.getvalue() != content:
+                          print('Existing test.php differs; left unchanged.')
+                          sys.exit(1)
+                  else:
+                      ftp.storbinary('STOR test.php', io.BytesIO(content))
+                  verified = io.BytesIO()
+                  ftp.retrbinary('RETR test.php', verified.write)
+                  assert verified.getvalue() == content
+                  print('Verified exact contents at https://svetdede.dedenik.cz/test.php')
+          except Exception as error:
+              print('FTPS upload failed: ' + type(error).__name__)
+              sys.exit(1)
+          PY
+      - name: Measure standalone PHP and static response
+        run: |
+          for path in test.php wp-includes/js/jquery/jquery.min.js; do
+            curl --silent --show-error --max-time 20 --output /tmp/response --write-out "$path HTTP %{http_code}; TLS %{time_appconnect}; first_byte %{time_starttransfer}; total %{time_total}\n" "https://svetdede.dedenik.cz/$path" || true
+            if [ "$path" = test.php ] && [ -f /tmp/response ]; then head -c 100 /tmp/response; fi
+          done
