@@ -88,4 +88,18 @@ check(strpos($html, 'https://www.dedenik.cz/#f2-tagcloud-2') !== false, 'More au
 $fixture_terms['post_tag']['davidl'] = new Exception('missing');
 ob_start(); require $theme_dir . '/template-parts/authors.php'; $html=ob_get_clean();
 check(strpos($html, 'aria-disabled="true"') !== false && strpos($html, 'href="https://example.test/tag/davidl/"') === false, 'Missing author tag is visible without a fabricated archive link');
+
+
+// Emergency archive pause must not mistake ordinary comment navigation for an archive.
+require $theme_dir . '/inc/archive-maintenance.php';
+check(dedenik_reader_archives_paused(), 'Archives are paused by default');
+foreach (array('disk_komentar','disk_profil','diskutujici','disk_strana') as $key) {
+    foreach (array('', '214319', array('214319'), null) as $value) {
+        check(dedenik_reader_archive_request(array($key=>$value)), 'Archive variants must be intercepted');
+    }
+}
+foreach (array(array(),array('p'=>42),array('cpage'=>2),array('replytocom'=>7),array('s'=>'disk_komentar')) as $query) {
+    check(!dedenik_reader_archive_request($query), 'Normal articles, comments and searches remain available');
+}
+
 echo 'Passed '.$tests." offline behavior checks\n";

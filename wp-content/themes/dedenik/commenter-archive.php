@@ -27,10 +27,14 @@ get_header();
     <?php endforeach; ?>
     </ol>
     <?php
-    $pagination_url = isset( $context['seed_id'] ) ? dedenik_discussant_comment_url( $context['seed_id'], 999999999 )
-        : dedenik_discussant_url( $context['name'], 999999999 );
-    $base = str_replace( 'disk_strana=999999999', 'disk_strana=%#%', $pagination_url );
-    $links = paginate_links( array( 'base' => $base, 'format' => '', 'current' => $context['page'], 'total' => $context['pages'], 'mid_size' => 1, 'end_size' => 1, 'prev_text' => '← Novější', 'next_text' => 'Starší →' ) );
+    if ( isset( $context['profile'] ) ) {
+        $archive_url = dedenik_discussant_profile_url( $context['profile'] );
+    } elseif ( isset( $context['seed_id'] ) ) {
+        $archive_url = dedenik_discussant_comment_url( $context['seed_id'] );
+    } else {
+        $archive_url = dedenik_discussant_url( $context['name'] );
+    }
+    $links = paginate_links( array( 'base' => $archive_url . '%_%', 'format' => '&disk_strana=%#%', 'current' => $context['page'], 'total' => $context['pages'], 'mid_size' => 1, 'end_size' => 1, 'prev_text' => '← Novější', 'next_text' => 'Starší →' ) );
     if ( $links ) { echo '<nav class="pagination" aria-label="Stránkování komentářů diskutujícího">' . $links . '</nav>'; }
     ?>
 <?php elseif ( 503 === $context['status'] ) : ?>

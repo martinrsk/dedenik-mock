@@ -13,6 +13,22 @@ if ( wp_parse_url( home_url(), PHP_URL_HOST ) !== 'svetdede.dedenik.cz' || DB_NA
     http_response_code( 409 ); echo '{"error":"Wrong target or index code unavailable"}'; exit;
 }
 global $wpdb;
+if ( 'readers_batch' === ( $_POST['action'] ?? '' ) ) {
+    if ( ! function_exists( 'dedenik_reader_index_batch' ) ) {
+        http_response_code( 409 ); echo '{"error":"Reader index code unavailable"}'; exit;
+    }
+    // The theme persists the cursor and holds its own per-site build lock.
+    $deadline = microtime( true ) + 4;
+    for ( $batch = 0; $batch < 8 && microtime( true ) < $deadline; ++$batch ) {
+        $done = dedenik_reader_index_batch();
+        if ( is_wp_error( $done ) ) {
+            http_response_code( 500 ); echo '{"error":"Reader index batch failed"}'; exit;
+        }
+        if ( true === $done ) { break; }
+    }
+    echo wp_json_encode( array( 'done' => $done, 'cursor' => (int) get_option( 'dedenik_reader_index_cursor', 0 ) ) );
+    exit;
+}
 if ( 'comments_status' === ( $_POST['action'] ?? '' ) ) {
     $table = dedenik_comments_table();
     $expected = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->comments} c JOIN {$wpdb->posts} p ON p.ID=c.comment_post_ID WHERE " . dedenik_comments_public_sql() );
