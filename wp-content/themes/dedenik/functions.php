@@ -1,6 +1,7 @@
 <?php
 /** Theme bootstrap. Search schema and initial indexing require an explicit operation. */
 defined( 'ABSPATH' ) || exit;
+require get_template_directory() . '/inc/archive-maintenance.php';
 require get_template_directory() . '/inc/setup.php';
 require get_template_directory() . '/inc/template-tags.php';
 require get_template_directory() . '/inc/customizer.php';

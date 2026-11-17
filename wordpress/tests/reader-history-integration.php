@@ -8,6 +8,7 @@
 if ( PHP_SAPI !== 'cli' || empty( $argv[1] ) ) {
     exit( 1 );
 }
+define( 'DEDENIK_READER_ARCHIVES_PAUSED', false );
 require $argv[1];
 if ( 'local' !== wp_get_environment_type()
     || ! preg_match( '/^dedenik_reader_test_[a-f0-9]{8}$/D', DB_NAME )

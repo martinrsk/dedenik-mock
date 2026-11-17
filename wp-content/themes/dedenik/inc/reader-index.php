@@ -90,12 +90,14 @@ function dedenik_reader_index_batch( $limit = 500 ) {
 }
 
 function dedenik_reader_schedule_build( $delay = 10 ) {
+    if ( dedenik_reader_archives_paused() ) { return; }
     if ( ! dedenik_reader_index_ready() && ! wp_next_scheduled( 'dedenik_reader_build' ) ) {
         wp_schedule_single_event( time() + $delay, 'dedenik_reader_build' );
     }
 }
 add_action( 'init', function () { dedenik_reader_schedule_build(); } );
 add_action( 'dedenik_reader_build', function () {
+    if ( dedenik_reader_archives_paused() ) { return; }
     $deadline = microtime( true ) + 4;
     for ( $batch = 0; $batch < 8 && microtime( true ) < $deadline; ++$batch ) {
         $result = dedenik_reader_index_batch();

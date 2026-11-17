@@ -207,7 +207,9 @@ add_filter( 'document_title_parts', function ( $parts ) {
     return $parts;
 } );
 add_filter( 'get_comment_author_link', function ( $link, $author, $comment_id ) {
-    if ( is_admin() || is_feed() ) { return $link; }
+    if ( is_admin() ) { return $link; }
+    if ( dedenik_reader_archives_paused() ) { return esc_html( $author ); }
+    if ( is_feed() ) { return $link; }
     $comment = get_comment( $comment_id );
     if ( ! dedenik_comments_public( $comment ) ) { return $link; }
     $name = dedenik_index_text( $comment->comment_author );
