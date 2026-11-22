@@ -1298,6 +1298,10 @@ h3 {
   overflow: hidden;
   border-radius: 12px;
 }
+.world-card-podcast {
+  position: relative;
+  overflow: hidden;
+}
 .world-podcast-new {
   position: absolute;
   top: 11px;
@@ -1310,6 +1314,7 @@ h3 {
   line-height: 18px;
   text-align: center;
   transform: rotate(-45deg);
+  z-index: 1;
 }
 .world-card-theatre .world-image { object-fit:contain; background:#6b79b5 }
 .world-card-books .world-image { height:auto; aspect-ratio:1; object-fit:contain; background:transparent }
