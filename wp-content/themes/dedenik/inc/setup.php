@@ -32,6 +32,20 @@ function dedenik_assets() {
     }
 }
 add_action( 'wp_enqueue_scripts', 'dedenik_assets' );
+function dedenik_comment_emojis( $field ) {
+    $emojis = array(
+        '🙂' => 'Úsměv', '😀' => 'Radost', '😂' => 'Smích', '😉' => 'Mrknutí',
+        '😍' => 'Zamilování', '🤗' => 'Objetí', '🤔' => 'Zamyšlení', '😢' => 'Smutek',
+        '😮' => 'Překvapení', '👍' => 'Palec nahoru', '👏' => 'Potlesk', '❤️' => 'Srdce',
+        '🌷' => 'Květina', '🐶' => 'Pes', '🐱' => 'Kočka', '☕' => 'Káva',
+    );
+    $field .= '<div class="comment-emojis" role="group" aria-label="' . esc_attr__( 'Emotikony do komentáře', 'dedenik' ) . '" hidden>';
+    foreach ( $emojis as $emoji => $label ) {
+        $field .= '<button type="button" class="comment-emoji" data-comment-emoji="' . esc_attr( $emoji ) . '" aria-label="' . esc_attr( $label ) . '" title="' . esc_attr( $label ) . '">' . esc_html( $emoji ) . '</button>';
+    }
+    return $field . '</div>';
+}
+add_filter( 'comment_form_field_comment', 'dedenik_comment_emojis' );
 // "Zobrazit další" renders more Category Posts items in a separate REST request.
 function dedenik_sidebar_loadmore_images( $response, $handler, $request ) {
     if ( ! preg_match( '~^/categoryPosts/loadmore/widget-(\d+)/\d+/\d+/(\d+)/?$~', $request->get_route(), $matches )

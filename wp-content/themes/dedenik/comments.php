@@ -2,6 +2,9 @@
 defined( 'ABSPATH' ) || exit;
 if ( post_password_required() ) { return; }
 $discussion_open = comments_open();
+if ( $discussion_open ) {
+    wp_enqueue_script( 'dedenik-comment-emojis', get_theme_file_uri( 'assets/js/comment-emojis.js' ), array(), wp_get_theme()->get( 'Version' ), true );
+}
 ?>
 <section id="comments" class="comments-area" aria-labelledby="comments-title">
 <h2 id="comments-title"><span id="comment-area"><?php printf( esc_html__( 'Diskuse (%s)', 'dedenik' ), esc_html( number_format_i18n( get_comments_number() ) ) ); ?></span></h2>
