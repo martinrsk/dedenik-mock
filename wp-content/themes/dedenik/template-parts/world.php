@@ -18,6 +18,7 @@ $landing = $landing_id ? get_post( $landing_id ) : null;
     if ( 'theatre' === $item['key'] ) { $has_theatre = true; }
 ?>
 <article class="world-card world-card-<?php echo esc_attr( $item['key'] ); ?>">
+<?php if ( 'podcast' === $item['key'] ) : ?><span class="world-podcast-new"><?php esc_html_e( 'NOVÉ', 'dedenik' ); ?></span><?php endif; ?>
 <?php
 $image = in_array( $item['key'], array( 'theatre', 'books' ), true ) ? '' : ( $item['image'] ? wp_get_attachment_image( $item['image'], 'medium', false, array( 'class' => 'world-image', 'alt' => 'radio' === $item['key'] ? 'Dagmar Ruščáková ve studiu Českého rozhlasu' : '', 'loading' => 'lazy' ) ) : '' );
 if ( 'podcast' === $item['key'] ) { $image = ''; }
@@ -27,7 +28,6 @@ else { $pictures = array( 'podcast' => 'podcast.png', 'theatre' => 'dedivadlo-lo
 <?php if ( 'podcast' === $item['key'] ) : ?><span class="world-podcast-art"><?php endif; ?>
 <img class="world-image" src="<?php echo esc_url( get_theme_file_uri( 'assets/images/' . $pictures[ $item['key'] ] ) ); ?>" alt="<?php echo 'theatre' === $item['key'] ? esc_attr( 'Logo Dedivadla se čtyřmi členkami souboru' ) : ( 'radio' === $item['key'] ? esc_attr( 'Dagmar Ruščáková ve studiu Českého rozhlasu' ) : '' ); ?>" loading="lazy" width="110" height="<?php echo esc_attr( $image_height ); ?>">
 <?php if ( 'podcast' === $item['key'] ) : ?>
-<span class="world-podcast-new"><?php esc_html_e( 'NOVÝ', 'dedenik' ); ?></span>
 </span>
 <?php endif; ?>
 <?php } ?>
