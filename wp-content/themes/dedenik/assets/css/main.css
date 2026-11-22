@@ -1292,6 +1292,25 @@ h3 {
 .world-card { display:grid; grid-template-columns:110px minmax(0,1fr); gap:12px; padding:10px; align-items:center }
 .world-card .world-image { display:block; width:110px; height:170px; object-fit:cover; border-radius:12px }
 .world-card-podcast .world-image { height:auto; aspect-ratio:1; object-fit:contain; background:#fff }
+.world-podcast-art {
+  position: relative;
+  align-self: center;
+  overflow: hidden;
+  border-radius: 12px;
+}
+.world-podcast-new {
+  position: absolute;
+  top: 11px;
+  left: -19px;
+  width: 80px;
+  background: #a34749;
+  color: #fff;
+  font-weight: 800;
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+  transform: rotate(-45deg);
+}
 .world-card-theatre .world-image { object-fit:contain; background:#6b79b5 }
 .world-card-books .world-image { height:auto; aspect-ratio:1; object-fit:contain; background:transparent }
 .world-card-theatre>div { align-self:stretch; display:grid; grid-template-rows:auto 1fr auto; min-width:0 }
