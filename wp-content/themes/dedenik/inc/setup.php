@@ -46,6 +46,10 @@ function dedenik_comment_emojis( $field ) {
     return $field . '</div>';
 }
 add_filter( 'comment_form_field_comment', 'dedenik_comment_emojis' );
+// Legacy comment tables can discard four-byte Unicode characters on insert.
+// Store emoji as numeric entities before database validation, including edits.
+add_filter( 'pre_comment_content', 'wp_encode_emoji', 99 );
+add_filter( 'comment_save_pre', 'wp_encode_emoji', 99 );
 // "Zobrazit další" renders more Category Posts items in a separate REST request.
 function dedenik_sidebar_loadmore_images( $response, $handler, $request ) {
     if ( ! preg_match( '~^/categoryPosts/loadmore/widget-(\d+)/\d+/\d+/(\d+)/?$~', $request->get_route(), $matches )

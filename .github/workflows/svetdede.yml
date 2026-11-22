@@ -51,7 +51,9 @@ jobs:
       - name: Check PHP syntax
         run: find wp-content/themes/dedenik -name '*.php' -print0 | xargs -0 -n1 php -n -l
       - name: Check theme behavior
-        run: php -n wordpress/tests/theme-behavior.php
+        run: |
+          php -n wordpress/tests/theme-behavior.php
+          php -n wordpress/tests/comment-emoji-storage.php
       - name: Check AI search isolation and budgets
         run: php wordpress/tests/ai-search-behavior.php
       - name: Check deployment boundaries
