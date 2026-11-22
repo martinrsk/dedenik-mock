@@ -923,6 +923,29 @@ h3 {
   font-weight:400;
   line-height:1.5
 }
+.comment-emojis:not([hidden]) {
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin:12px 0 20px;
+}
+.comment-emojis .comment-emoji {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:44px;
+  height:44px;
+  padding:4px;
+  border:1px solid #d8d2c6;
+  border-radius:8px;
+  background:#fff;
+  color:var(--ink);
+  font-size:24px;
+  line-height:1;
+  cursor:pointer;
+}
+.comment-emojis .comment-emoji:hover { background:#e1eeea }
+.comment-emojis .comment-emoji:focus-visible { outline:2px solid var(--green); outline-offset:2px }
 .comment-form label {
   display:block;
   font-size:14px;
