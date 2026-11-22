@@ -24,7 +24,12 @@ if ( 'podcast' === $item['key'] ) { $image = ''; }
 if ( ! $image && ! in_array( $item['key'], array( 'podcast', 'theatre', 'books' ), true ) && $item['page'] ) { $image = get_the_post_thumbnail( $item['page'], 'medium', array( 'class' => 'world-image', 'alt' => '', 'loading' => 'lazy' ) ); }
 if ( $image ) { echo $image; }
 else { $pictures = array( 'podcast' => 'podcast.png', 'theatre' => 'dedivadlo-logo.jpg', 'books' => 'book-logo.png', 'radio' => 'radio-columnist.png' ); $image_height = in_array( $item['key'], array( 'podcast', 'radio' ), true ) ? 110 : 170; ?>
+<?php if ( 'podcast' === $item['key'] ) : ?><span class="world-podcast-art"><?php endif; ?>
 <img class="world-image" src="<?php echo esc_url( get_theme_file_uri( 'assets/images/' . $pictures[ $item['key'] ] ) ); ?>" alt="<?php echo 'theatre' === $item['key'] ? esc_attr( 'Logo Dedivadla se čtyřmi členkami souboru' ) : ( 'radio' === $item['key'] ? esc_attr( 'Dagmar Ruščáková ve studiu Českého rozhlasu' ) : '' ); ?>" loading="lazy" width="110" height="<?php echo esc_attr( $image_height ); ?>">
+<?php if ( 'podcast' === $item['key'] ) : ?>
+<span class="world-podcast-new"><?php esc_html_e( 'NOVÝ', 'dedenik' ); ?></span>
+</span>
+<?php endif; ?>
 <?php } ?>
 <div><span class="badge"><?php echo esc_html( $item['label'] ); ?></span>
 <?php if ( 'theatre' === $item['key'] ) : ?><div class="theatre-program-list" aria-label="<?php echo esc_attr( __( 'Program Dedivadla', 'dedenik' ) ); ?>"><?php foreach ( dedenik_theatre_program() as $performance ) : ?><p><strong><?php echo esc_html( $performance['date'] ); ?></strong> · <?php echo esc_html( $performance['title'] ); ?> · <?php echo esc_html( $performance['time'] ); ?> · <?php echo esc_html( $performance['location'] ); ?></p><?php endforeach; ?></div>
