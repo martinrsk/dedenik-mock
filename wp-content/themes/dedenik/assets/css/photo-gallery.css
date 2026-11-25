@@ -1,0 +1,118 @@
+.photo-albums {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+    gap: 1.25rem;
+    padding: 0;
+    list-style: none;
+}
+
+.photo-albums a {
+    display: block;
+    height: 100%;
+    overflow: hidden;
+    border: 1px solid currentColor;
+    border-radius: .5rem;
+}
+
+.photo-albums img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+}
+
+.photo-albums span {
+    display: block;
+    padding: .75rem 1rem;
+    font-weight: 700;
+}
+
+.photo-gallery .wp-block-gallery.has-nested-images {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .85rem;
+    align-items: start;
+}
+
+.photo-gallery .wp-block-gallery.has-nested-images > figure.wp-block-image {
+    width: 100% !important;
+    margin: 0;
+}
+
+.photo-gallery .wp-block-gallery.has-nested-images > figure.wp-block-image img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+
+.photo-gallery .wp-block-gallery.has-nested-images > figure.wp-block-image figcaption {
+    position: static;
+    background: none;
+    color: inherit;
+    padding: .35rem 0;
+}
+
+.photo-gallery .wp-block-gallery > figcaption {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 42rem) {
+    .photo-gallery .wp-block-gallery.has-nested-images {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: .5rem;
+    }
+}
+
+.photo-viewer {
+    box-sizing: border-box;
+    width: min(72rem, 96vw);
+    max-height: 94dvh;
+    padding: .75rem;
+    border: 0;
+    border-radius: .5rem;
+    background: #201b16;
+    color: white;
+}
+
+.photo-viewer::backdrop {
+    background: rgb(0 0 0 / 78%);
+}
+
+.photo-viewer-frame img {
+    display: block;
+    width: 100%;
+    height: min(64dvh, 48rem);
+    object-fit: contain;
+}
+
+.photo-viewer-close {
+    display: block;
+    margin: 0 0 .5rem auto;
+}
+
+.photo-viewer p {
+    margin: .5rem 0;
+    text-align: center;
+}
+
+.photo-viewer-controls:not([hidden]) {
+    display: flex;
+    justify-content: space-between;
+    gap: .5rem;
+}
+
+.photo-viewer button {
+    padding: .5rem .75rem;
+    border: 1px solid #918678;
+    border-radius: .25rem;
+    background: #fffaf1;
+    color: #201b16;
+    font: inherit;
+    cursor: pointer;
+}
+
+.photo-viewer button:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}

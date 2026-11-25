@@ -13,7 +13,14 @@ if ( ! is_paged() ) { get_template_part( 'template-parts/hero' ); }
     <div class="cards"><?php while ( have_posts() ) : the_post(); get_template_part( 'template-parts/card' ); endwhile; ?></div>
     <?php else : get_template_part( 'template-parts/listing' ); endif; ?>
 </section>
-<?php if ( ! is_paged() ) { get_template_part( 'template-parts/world' ); get_template_part( 'template-parts/discover' ); get_template_part( 'template-parts/search-archive' ); } ?>
+<?php
+if ( ! is_paged() ) {
+    get_template_part( 'template-parts/world' );
+    get_template_part( 'template-parts/discover' );
+    get_template_part( 'template-parts/photo-gallery-banner' );
+    get_template_part( 'template-parts/search-archive' );
+}
+?>
 <?php if ( is_active_sidebar( 'widgets_sidebar_left' ) || is_active_sidebar( 'widgets_sidebar_right' ) ) : ?>
 <div class="wrap"><details class="home-community"><summary><?php esc_html_e( 'Další obsah komunity a informace o Dedeníku', 'dedenik' ); ?></summary><?php get_sidebar(); ?></details></div>
 <?php endif; ?>
