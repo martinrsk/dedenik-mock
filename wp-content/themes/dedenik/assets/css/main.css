@@ -1512,3 +1512,53 @@ h3 {
 .discover-side .authors { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:13px; justify-items:center }
 .discover-side .author { width:100%; min-width:0; min-height:75px; font-size:11px }
 .author[aria-disabled="true"] { cursor:default }
+
+.photo-gallery-banner {
+  position: relative;
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+  color: var(--ink);
+  text-decoration: none;
+}
+.photo-gallery-banner img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: inherit;
+}
+.photo-gallery-banner > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  display: flex;
+  align-items: center;
+  gap: .35em;
+  padding: 1rem clamp(.85rem, 2.6vw, 2.5rem);
+  background: linear-gradient(90deg, var(--paper), rgb(255 253 248 / 89%) 77%, transparent);
+  border-radius: 15px 0 0 15px;
+  font: 700 clamp(1.4rem, 3vw, 2.65rem)/1.15 var(--serif);
+}
+.photo-gallery-banner:hover > span,
+.photo-gallery-banner:focus-visible > span {
+  text-decoration: underline;
+  text-underline-offset: .16em;
+}
+.photo-gallery-banner:focus-visible {
+  outline: 3px solid var(--green);
+  outline-offset: 4px;
+}
+@media (max-width: 38rem) {
+  .photo-gallery-banner img {
+    aspect-ratio: 2.15 / 1;
+    object-fit: cover;
+    object-position: right;
+    border-radius: 15px 15px 0 0;
+  }
+  .photo-gallery-banner > span {
+    position: static;
+    justify-content: space-between;
+    background: none;
+    padding: .75rem 1rem;
+  }
+}
