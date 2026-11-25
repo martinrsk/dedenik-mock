@@ -1409,6 +1409,57 @@ h3 {
 .home #latest > .section-heading { display:flex; align-items:baseline; justify-content:space-between; gap:16px }
 .home #latest > .section-heading > a { white-space:nowrap; font-size:14px }
 @media(max-width:620px) { .home #latest > .section-heading { flex-wrap:wrap; gap:0; margin-bottom:12px } }
+
+.recent-comments {
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  margin-top:20px;
+  padding:14px 16px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#fff;
+  overflow-wrap:anywhere
+}
+.recent-comments h2 {
+  margin:0;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--line);
+  font:500 20px/1.25 var(--sans);
+  text-align:center
+}
+.recent-comments-scroll {
+  min-height:0;
+  max-height:min(60vh,26rem);
+  overflow-y:auto;
+  scrollbar-width:thin;
+  scrollbar-color:#a69c8d transparent
+}
+.recent-comments ol { margin:0; padding:0; list-style:none }
+.recent-comments li { padding:12px 6px; font:14px/1.45 var(--sans) }
+.recent-comments li + li { border-top:1px solid var(--line) }
+.recent-comments li strong { display:block }
+.recent-comments li p { margin:3px 0 6px }
+.recent-comments li a { color:var(--green); text-decoration:underline; text-underline-offset:2px }
+@media(min-width:980px) {
+  .home .latest-with-comments {
+    display:grid;
+    width:auto;
+    max-width:1500px;
+    margin-inline-start:max(0px,calc((100% - 1180px) / 2));
+    grid-template-columns:minmax(0,1fr) clamp(260px,22vw,320px);
+    column-gap:clamp(20px,2vw,32px)
+  }
+  .latest-with-comments .recent-comments {
+    grid-area:1 / 2 / span 3;
+    contain:size;
+    margin-top:0
+  }
+  .recent-comments-scroll { max-height:none }
+}
+@media(min-width:980px) and (max-width:1199px) {
+  .home .latest-with-comments .cards { grid-template-columns:repeat(2,minmax(0,1fr)) }
+}
 .theatre-story { margin:24px 0 36px; max-width:1000px }
 .theatre-story > p { max-width:850px; font-size:1.05rem; line-height:1.7 }
 .theatre-gallery { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-top:20px }
