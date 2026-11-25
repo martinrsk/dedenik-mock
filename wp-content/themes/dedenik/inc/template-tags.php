@@ -40,23 +40,6 @@ function dedenik_posts_url() {
     $page = absint( get_option( 'page_for_posts' ) );
     return $page ? get_permalink( $page ) : home_url( '/' );
 }
-function dedenik_recent_article_comments() {
-    global $wpdb;
-    $public = dedenik_comments_public_sql();
-    $comments = $wpdb->get_results(
-        "SELECT c.*
-         FROM {$wpdb->comments} c JOIN {$wpdb->posts} p ON p.ID = c.comment_post_ID
-         WHERE $public AND p.post_type = 'post'
-         ORDER BY c.comment_date_gmt DESC, c.comment_ID DESC
-         LIMIT 10"
-    );
-    if ( ! $comments ) { return array(); }
-
-    $post_ids = array_unique( wp_list_pluck( $comments, 'comment_post_ID' ) );
-    $category_permalinks = false !== strpos( get_option( 'permalink_structure' ), '%category%' );
-    _prime_post_caches( $post_ids, $category_permalinks, false );
-    return array_map( 'get_comment', $comments );
-}
 function dedenik_primary_category() {
     $categories = get_the_category();
     if ( ! $categories ) { return; }
