@@ -11,6 +11,53 @@
     let index = 0;
     let opener;
 
+    const fullscreen = dialog.querySelector('.photo-viewer-fullscreen');
+    if (fullscreen) {
+        const enterLabel = fullscreen.textContent;
+        const setExpanded = expanded => {
+            dialog.classList.toggle('is-expanded', expanded);
+            fullscreen.textContent = expanded ? fullscreen.dataset.restoreLabel : enterLabel;
+        };
+
+        fullscreen.hidden = false;
+        fullscreen.addEventListener('click', async () => {
+            if (dialog.classList.contains('is-expanded')) {
+                if (document.fullscreenElement === dialog) {
+                    await document.exitFullscreen().catch(() => {});
+                } else {
+                    setExpanded(false);
+                }
+                return;
+            }
+
+            setExpanded(true);
+            if (document.fullscreenEnabled && dialog.requestFullscreen) {
+                try {
+                    await dialog.requestFullscreen();
+                    if (!dialog.open && document.fullscreenElement === dialog) {
+                        await document.exitFullscreen();
+                    }
+                } catch {
+                    // Keep the viewport-sized viewer if native fullscreen is unavailable.
+                }
+            }
+        });
+        document.addEventListener('fullscreenchange', () => {
+            setExpanded(dialog.open && document.fullscreenElement === dialog);
+        });
+        dialog.addEventListener('cancel', event => {
+            if (!dialog.classList.contains('is-expanded') || document.fullscreenElement === dialog) return;
+            event.preventDefault();
+            setExpanded(false);
+        });
+        dialog.addEventListener('close', () => {
+            setExpanded(false);
+            if (document.fullscreenElement === dialog) {
+                document.exitFullscreen().catch(() => {});
+            }
+        });
+    }
+
     function showPhoto(position) {
         index = (position + photos.length) % photos.length;
         const link = photos[index];
