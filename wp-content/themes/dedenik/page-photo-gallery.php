@@ -49,7 +49,10 @@ get_header();
     </article>
 <?php endwhile; ?>
 <dialog id="photo-viewer" class="photo-viewer" aria-label="<?php esc_attr_e( 'Zvětšená fotografie', 'dedenik' ); ?>" aria-describedby="photo-viewer-description">
-    <button type="button" class="photo-viewer-close" autofocus><?php esc_html_e( 'Zavřít', 'dedenik' ); ?></button>
+    <div class="photo-viewer-toolbar">
+        <button type="button" class="photo-viewer-fullscreen" hidden data-restore-label="<?php esc_attr_e( 'Původní velikost', 'dedenik' ); ?>"><?php esc_html_e( 'Zvětšit', 'dedenik' ); ?></button>
+        <button type="button" class="photo-viewer-close" autofocus><?php esc_html_e( 'Zavřít', 'dedenik' ); ?></button>
+    </div>
     <div class="photo-viewer-frame"><img alt=""></div>
     <p id="photo-viewer-description" aria-live="polite"></p>
     <div class="photo-viewer-controls">
